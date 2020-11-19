@@ -1,0 +1,18 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+pre-commit = "*"
+black = "==20.8b1"
+pylint = "*"
+
+[packages]
+"rpi.gpio" = "*"
+pillow = "*"
+spidev = "*"
+ffmpeg-python = "*"
+
+[requires]
+python_version = "3.8"
