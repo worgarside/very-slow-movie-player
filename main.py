@@ -32,7 +32,7 @@ except RuntimeError:
     LOGGER.exception("Unable to import E-Paper Driver, running in test mode")
 
 MOVIE_DIRECTORY = f"{Path.home()}/movies"
-FRAME_DELAY = 1
+FRAME_DELAY = 120
 INCREMENT = 12
 TMP_FRAME_PATH = "/tmp/vsmp_frame.jpg"
 
@@ -50,12 +50,11 @@ def generate_frame(in_filename, frame):
 
     (
         ffmpeg_input(in_filename, ss=f"{frame * 41.666666}ms")
-            .filter("scale", EPD_WIDTH, EPD_HEIGHT,
-                    force_original_aspect_ratio=1)
-            .filter("pad", EPD_WIDTH, EPD_HEIGHT, -1, -1)
-            .output(TMP_FRAME_PATH, vframes=1)
-            .overwrite_output()
-            .run(capture_stdout=True, capture_stderr=True)
+        .filter("scale", EPD_WIDTH, EPD_HEIGHT, force_original_aspect_ratio=1)
+        .filter("pad", EPD_WIDTH, EPD_HEIGHT, -1, -1)
+        .output(TMP_FRAME_PATH, vframes=1)
+        .overwrite_output()
+        .run(capture_stdout=True, capture_stderr=True)
     )
 
 
@@ -73,7 +72,7 @@ def get_progress(file_name, default=0):
     with open(PROGRESS_LOG) as fin:
         log_data = load(fin)
 
-    LOGGER.debug("Getting progress for `%s`", file_name)
+    LOGGER.info("Getting progress for `%s`", file_name)
 
     return log_data.get(file_name, {}).get("current", default)
 
@@ -91,8 +90,7 @@ def set_progress(file_name, current_frame, frame_count=None):
 
     progress = {file_name: {"current": current_frame}}
 
-    LOGGER.debug("Updating log for `%s` to frame #%i", file_name,
-                 current_frame)
+    LOGGER.debug("Updating log for `%s` to frame #%i", file_name, current_frame)
 
     if frame_count:
         progress[file_name]["total"] = frame_count
@@ -112,7 +110,7 @@ def play_video(file_name):
 
     video_path = f"{MOVIE_DIRECTORY}/{file_name}"
 
-    LOGGER.info("Input video is %s", video_path)
+    LOGGER.info("Input video is `%s`", video_path)
 
     if not exists(video_path):
         raise FileNotFoundError(f"Unable to find `{video_path}`")
@@ -122,7 +120,7 @@ def play_video(file_name):
     LOGGER.info("There are %d frames in this video", frame_count)
     LOGGER.info(
         "It's going to take %d hours to play this video",
-        frame_count * 41.6666666
+        ((frame_count / INCREMENT) * FRAME_DELAY) / 3600,
     )
 
     for frame in range(get_progress(file_name, 2000), frame_count, INCREMENT):
@@ -164,8 +162,7 @@ def choose_next_video():
             current_frame := video.get("current", -1)
         ) > INCREMENT * 100:
             LOGGER.info(
-                "`%s` has only had %i/%i frames played", file_name,
-                current_frame, total
+                "`%s` has only had %i/%i frames played", file_name, current_frame, total
             )
             return file_name
 
@@ -173,7 +170,8 @@ def choose_next_video():
         if file not in log_data and file.endswith(".mp4"):
             LOGGER.info("`%s` hasn't been played yet", file)
             return file
-        LOGGER.debug("Skipping `%s`", file)
+
+        LOGGER.info("Skipping `%s`", file)
 
     return None
 
