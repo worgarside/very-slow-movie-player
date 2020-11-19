@@ -5,6 +5,7 @@ from os.path import exists, dirname, abspath, isfile
 from pathlib import Path
 
 from PIL import Image
+from datetime import datetime
 from ffmpeg import input as ffmpeg_input, probe
 from sys import stdout
 from time import sleep
@@ -13,7 +14,9 @@ LOGGER = getLogger(__name__)
 LOGGER.setLevel(DEBUG)
 
 SH = StreamHandler(stdout)
-FH = FileHandler(f"{Path.home()}/logs/very-slow-movie-player/log.log")
+FH = FileHandler(
+    f"{Path.home()}/logs/very-slow-movie-player/{datetime.today().strftime('%Y-%m-%d')}.log"
+)
 
 FORMATTER = Formatter(
     "%(asctime)s\t%(name)s\t[%(levelname)s]\t%(message)s", "%Y-%m-%d %H:%M:%S"
@@ -118,12 +121,15 @@ def play_video(file_name):
     # Check how many frames are in the movie
     frame_count = int(probe(video_path)["streams"][0]["nb_frames"])
     LOGGER.info("There are %d frames in this video", frame_count)
+
+    current_frame = get_progress(file_name, 2000)
+
     LOGGER.info(
         "It's going to take %d hours to play this video",
-        ((frame_count / INCREMENT) * FRAME_DELAY) / 3600,
+        (((frame_count - current_frame) / INCREMENT) * FRAME_DELAY) / 3600,
     )
 
-    for frame in range(get_progress(file_name, 2000), frame_count, INCREMENT):
+    for frame in range(current_frame, frame_count, INCREMENT):
         set_progress(file_name, frame, frame_count)
 
         # Use ffmpeg to extract a frame from the movie, crop it,
@@ -177,7 +183,8 @@ def choose_next_video():
 
 
 if __name__ == "__main__":
-    if not isfile(PROGRESS_LOG):
+    if not exists(PROGRESS_LOG):
+        LOGGER.warning("Progress log not found at `%s`", PROGRESS_LOG)
         with open(PROGRESS_LOG, "w") as _fout:
             dump(dict(), _fout, indent=4)
 
