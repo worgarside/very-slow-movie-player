@@ -145,7 +145,6 @@ def play_video(file_name):
         DISPLAY.display(DISPLAY.getbuffer(pil_im))
 
         sleep(FRAME_DELAY)
-        DISPLAY.init()
 
 
 def choose_next_video():
@@ -162,6 +161,9 @@ def choose_next_video():
     LOGGER.info("There are %i videos in the log", len(log_data))
 
     for file_name in log_data:
+        if not exists(f"{MOVIE_DIRECTORY}/{file_name}"):
+            continue
+
         video = log_data[file_name]
 
         if (total := video.get("total", -1)) - (
