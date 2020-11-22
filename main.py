@@ -1,11 +1,11 @@
+from datetime import datetime
 from json import dump, load
 from logging import getLogger, StreamHandler, FileHandler, DEBUG, Formatter
-from os import listdir
-from os.path import exists, dirname, abspath, isfile
+from os import listdir, mkdir
+from os.path import exists, dirname, abspath
 from pathlib import Path
 
 from PIL import Image
-from datetime import datetime
 from ffmpeg import input as ffmpeg_input, probe
 from sys import stdout
 from time import sleep
@@ -13,10 +13,20 @@ from time import sleep
 LOGGER = getLogger(__name__)
 LOGGER.setLevel(DEBUG)
 
+LOG_DIR = f"{Path.home()}/logs/very-slow-movie-player"
+
+try:
+    mkdir(f"{Path.home()}/logs")
+except FileExistsError:
+    pass
+
+try:
+    mkdir(LOG_DIR)
+except FileExistsError:
+    pass
+
 SH = StreamHandler(stdout)
-FH = FileHandler(
-    f"{Path.home()}/logs/very-slow-movie-player/{datetime.today().strftime('%Y-%m-%d')}.log"
-)
+FH = FileHandler(f"{LOG_DIR}/{datetime.today().strftime('%Y-%m-%d')}.log")
 
 FORMATTER = Formatter(
     "%(asctime)s\t%(name)s\t[%(levelname)s]\t%(message)s", "%Y-%m-%d %H:%M:%S"
@@ -122,7 +132,7 @@ def play_video(file_name):
     frame_count = int(probe(video_path)["streams"][0]["nb_frames"])
     LOGGER.info("There are %d frames in this video", frame_count)
 
-    current_frame = get_progress(file_name, 2000)
+    current_frame = get_progress(file_name, 2000 if frame_count >= 10000 else 0)
 
     LOGGER.info(
         "It's going to take %d hours to play this video",
@@ -175,7 +185,7 @@ def choose_next_video():
             return file_name
 
     for file in listdir(MOVIE_DIRECTORY):
-        if file not in log_data and file.endswith(".mp4"):
+        if file not in log_data and file.lower().endswith(".mp4"):
             LOGGER.info("`%s` hasn't been played yet", file)
             return file
 
@@ -198,7 +208,12 @@ if __name__ == "__main__":
     DISPLAY.Clear()
 
     while next_video := choose_next_video():
-        play_video(next_video)
+        try:
+            play_video(next_video)
+        except Exception as exc:
+            LOGGER.exception(
+                f"Unable to play video: `{type(exc).__name__} - {exc.__str__()}`"
+            )
 
     DISPLAY.sleep()
     implementation.module_exit()
