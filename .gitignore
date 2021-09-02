@@ -131,3 +131,5 @@ dmypy.json
 
 !/drivers/waveshare
 .idea
+
+*.json
