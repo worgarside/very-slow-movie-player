@@ -6,9 +6,10 @@ from os.path import exists, dirname, abspath
 from pathlib import Path
 
 from PIL import Image
-from ffmpeg import input as ffmpeg_input, probe
 from sys import stdout
 from time import sleep
+
+from ffmpeg import input as ffmpeg_input, probe
 
 LOGGER = getLogger(__name__)
 LOGGER.setLevel(DEBUG)
@@ -40,9 +41,11 @@ try:
     from epd import EPD, EPD_WIDTH, EPD_HEIGHT, implementation
 
     DISPLAY = EPD()
+    TEST_MODE = False
 except RuntimeError:
     DISPLAY = None
-    LOGGER.exception("Unable to import E-Paper Driver, running in test mode")
+    TEST_MODE = True
+    LOGGER.error("Unable to import E-Paper Driver, running in test mode")
 
 MOVIE_DIRECTORY = f"{Path.home()}/movies"
 FRAME_DELAY = 120
@@ -129,7 +132,12 @@ def play_video(file_name):
         raise FileNotFoundError(f"Unable to find `{video_path}`")
 
     # Check how many frames are in the movie
-    frame_count = int(probe(video_path)["streams"][0]["nb_frames"])
+    probe_streams = probe(video_path).get("streams")
+    if not probe_streams:
+        raise Exception("No streams found in ffmpeg probe")
+
+    frame_count = int(probe_streams[0].get("nb_frames") or  24 * float(probe_streams[0]["duration"]))
+
     LOGGER.info("There are %d frames in this video", frame_count)
 
     current_frame = get_progress(file_name, 2000 if frame_count >= 10000 else 0)
@@ -142,17 +150,18 @@ def play_video(file_name):
     for frame in range(current_frame, frame_count, INCREMENT):
         set_progress(file_name, frame, frame_count)
 
-        # Use ffmpeg to extract a frame from the movie, crop it,
-        # letterbox it and output it as a JPG
-        generate_frame(video_path, frame)
+        if not TEST_MODE:
+            # Use ffmpeg to extract a frame from the movie, crop it,
+            # letterbox it and output it as a JPG
+            generate_frame(video_path, frame)
 
-        # Open JPG in PIL and dither the image into a 1 bit bitmap
-        pil_im = Image.open(TMP_FRAME_PATH).convert(
-            mode="1", dither=Image.FLOYDSTEINBERG
-        )
+            # Open JPG in PIL and dither the image into a 1 bit bitmap
+            pil_im = Image.open(TMP_FRAME_PATH).convert(
+                mode="1", dither=Image.FLOYDSTEINBERG
+            )
 
-        # display the image
-        DISPLAY.display(DISPLAY.getbuffer(pil_im))
+            # display the image
+            DISPLAY.display(DISPLAY.getbuffer(pil_im))
 
         sleep(FRAME_DELAY)
 
@@ -200,20 +209,20 @@ if __name__ == "__main__":
         with open(PROGRESS_LOG, "w") as _fout:
             dump(dict(), _fout, indent=4)
 
-    if DISPLAY is None:
-        raise Exception("EPD Display not initialised")
-
-    # Initialise and clear the screen
-    DISPLAY.init()
-    DISPLAY.Clear()
+    if not TEST_MODE:
+        # Initialise and clear the screen
+        DISPLAY.init()
+        DISPLAY.Clear()
 
     while next_video := choose_next_video():
         try:
             play_video(next_video)
         except Exception as exc:
+            raise
             LOGGER.exception(
                 f"Unable to play video: `{type(exc).__name__} - {exc.__str__()}`"
             )
 
-    DISPLAY.sleep()
-    implementation.module_exit()
+    if not TEST_MODE:
+        DISPLAY.sleep()
+        implementation.module_exit()
