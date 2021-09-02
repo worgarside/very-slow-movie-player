@@ -16,6 +16,7 @@ ffmpeg-python = "*"
 youtube-dl = "*"
 ffmpeg = "*"
 python-dotenv = "*"
+requests = "*"
 
 [requires]
 python_version = "3.8"
