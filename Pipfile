@@ -14,7 +14,6 @@ pillow = "*"
 spidev = { os_name = "== 'linux'" }
 ffmpeg-python = "*"
 youtube-dl = "*"
-ffmpeg = "*"
 python-dotenv = "*"
 requests = "*"
 
