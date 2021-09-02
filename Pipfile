@@ -9,10 +9,13 @@ black = "==20.8b1"
 pylint = "*"
 
 [packages]
-"rpi.gpio" = "*"
+"rpi.gpio" = { os_name = "== 'linux'" }
 pillow = "*"
-spidev = "*"
+spidev = { os_name = "== 'linux'" }
 ffmpeg-python = "*"
+youtube-dl = "*"
+ffmpeg = "*"
+python-dotenv = "*"
 
 [requires]
 python_version = "3.8"
