@@ -6,7 +6,7 @@
 # *----------------
 # * | This version:   V1.0
 # * | Date        :   2019-06-21
-# * | Info        :   
+# * | Info        :
 # ******************************************************************************
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documnetation files (the "Software"), to deal
@@ -35,10 +35,10 @@ import time
 
 class RaspberryPi:
     # Pin definition
-    RST_PIN         = 17
-    DC_PIN          = 25
-    CS_PIN          = 8
-    BUSY_PIN        = 24
+    RST_PIN = 17
+    DC_PIN = 25
+    CS_PIN = 8
+    BUSY_PIN = 24
 
     def __init__(self):
         import spidev
@@ -85,28 +85,30 @@ class RaspberryPi:
 
 class JetsonNano:
     # Pin definition
-    RST_PIN         = 17
-    DC_PIN          = 25
-    CS_PIN          = 8
-    BUSY_PIN        = 24
+    RST_PIN = 17
+    DC_PIN = 25
+    CS_PIN = 8
+    BUSY_PIN = 24
 
     def __init__(self):
         import ctypes
+
         find_dirs = [
             os.path.dirname(os.path.realpath(__file__)),
-            '/usr/local/lib',
-            '/usr/lib',
+            "/usr/local/lib",
+            "/usr/lib",
         ]
         self.SPI = None
         for find_dir in find_dirs:
-            so_filename = os.path.join(find_dir, 'sysfs_software_spi.so')
+            so_filename = os.path.join(find_dir, "sysfs_software_spi.so")
             if os.path.exists(so_filename):
                 self.SPI = ctypes.cdll.LoadLibrary(so_filename)
                 break
         if self.SPI is None:
-            raise RuntimeError('Cannot find sysfs_software_spi.so')
+            raise RuntimeError("Cannot find sysfs_software_spi.so")
 
         import Jetson.GPIO
+
         self.GPIO = Jetson.GPIO
 
     def digital_write(self, pin, value):
@@ -142,13 +144,26 @@ class JetsonNano:
         self.GPIO.cleanup()
 
 
-if os.path.exists('/sys/bus/platform/drivers/gpiomem-bcm2835'):
-    implementation = RaspberryPi()
-else:
-    implementation = JetsonNano()
+try:
+    if os.path.exists("/sys/bus/platform/drivers/gpiomem-bcm2835"):
+        implementation = RaspberryPi()
+    else:
+        implementation = JetsonNano()
 
-for func in [x for x in dir(implementation) if not x.startswith('_')]:
-    setattr(sys.modules[__name__], func, getattr(implementation, func))
+    for func in dir(implementation):
+        if not func.startswith("_"):
+            setattr(sys.modules[__name__], func, getattr(implementation, func))
 
+    TEST_MODE = False
+except RuntimeError:
 
-### END OF FILE ###
+    class FakeImplementation:
+        """Class to cover functionality of implementations on non-supporting devices"""
+
+    for method in set().union(dir(RaspberryPi), dir(JetsonNano)):
+        if not method.startswith("_"):
+            setattr(FakeImplementation, method, lambda *a, **k: None)
+
+    implementation = FakeImplementation()
+
+    TEST_MODE = True
