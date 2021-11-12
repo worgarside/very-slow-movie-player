@@ -9,9 +9,9 @@ black = "==20.8b1"
 pylint = "*"
 
 [packages]
-"rpi.gpio" = { os_name = "== 'linux'" }
+"rpi.gpio" = { sys_platform = "== 'linux'" }
 pillow = "*"
-spidev = { os_name = "== 'linux'" }
+spidev = { sys_platform = "== 'linux'" }
 ffmpeg-python = "*"
 youtube-dl = "*"
 python-dotenv = "*"
