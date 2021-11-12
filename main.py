@@ -4,12 +4,14 @@ from logging import getLogger, StreamHandler, FileHandler, DEBUG, Formatter
 from os import listdir, mkdir
 from os.path import exists, dirname, abspath
 from pathlib import Path
-
-from PIL import Image
 from sys import stdout
 from time import sleep
 
+from PIL import Image
+
+from epd import EPD, EPD_WIDTH, EPD_HEIGHT, implementation, FRAME_DELAY
 from ffmpeg import input as ffmpeg_input, probe
+from google_client import GoogleClient, MediaType
 
 LOGGER = getLogger(__name__)
 LOGGER.setLevel(DEBUG)
@@ -37,18 +39,16 @@ SH.setFormatter(FORMATTER)
 LOGGER.addHandler(FH)
 LOGGER.addHandler(SH)
 
-try:
-    from epd import EPD, EPD_WIDTH, EPD_HEIGHT, implementation
-
-    DISPLAY = EPD()
-    TEST_MODE = False
-except RuntimeError:
-    DISPLAY = None
-    TEST_MODE = True
-    LOGGER.error("Unable to import E-Paper Driver, running in test mode")
+DISPLAY = EPD()
+GOOGLE = GoogleClient(
+    "very-slow-movie-player",
+    [
+        "https://www.googleapis.com/auth/photoslibrary",
+        "https://www.googleapis.com/auth/photoslibrary.sharing",
+    ],
+)
 
 MOVIE_DIRECTORY = f"{Path.home()}/movies"
-FRAME_DELAY = 120
 INCREMENT = 12
 TMP_FRAME_PATH = "/tmp/vsmp_frame.jpg"
 
@@ -93,38 +93,50 @@ def get_progress(file_name, default=0):
     return log_data.get(file_name, {}).get("current", default)
 
 
-def set_progress(file_name, current_frame, frame_count=None):
+def set_progress(video_path, current_frame, frame_count=None):
     """Update the JSON log file so we can resume if the program is exited
 
     Args:
-        file_name (str): the name of the file being played
+        video_path (str): the path to the file being played
         current_frame (int): which frame has been played most recently
         frame_count (int): the total number of frames in the video
     """
     with open(PROGRESS_LOG) as fin:
         log_data = load(fin)
 
-    progress = {file_name: {"current": current_frame}}
+    progress = {video_path: {"current": current_frame}}
 
-    LOGGER.debug("Updating log for `%s` to frame #%i", file_name, current_frame)
+    LOGGER.debug("Updating log for `%s` to frame #%i", video_path, current_frame)
 
     if frame_count:
-        progress[file_name]["total"] = frame_count
+        progress[video_path]["total"] = frame_count
 
     log_data.update(progress)
 
     with open(PROGRESS_LOG, "w") as fout:
-        dump(log_data, fout, indent=4)
+        dump(log_data, fout, indent=2)
 
 
-def play_video(file_name):
+def display_image(image_path, display_time=FRAME_DELAY):
+    LOGGER.info("Displaying `%s` for %s seconds", image_path, display_time)
+    # Open JPG in PIL and dither the image into a 1 bit bitmap
+    pil_im = Image.open(image_path).convert(mode="1", dither=Image.FLOYDSTEINBERG)
+
+    # display the image
+    DISPLAY.display(DISPLAY.getbuffer(pil_im))
+
+    sleep(display_time)
+
+
+def play_video(video_path):
     """Play a video file on the E-Paper display
 
     Args:
-        file_name (str): the name of the file to play
-    """
+        video_path (str): the path to the file to play
 
-    video_path = f"{MOVIE_DIRECTORY}/{file_name}"
+    Raises:
+        FileNotFoundError: if the video path doesn't exist
+    """
 
     LOGGER.info("Input video is `%s`", video_path)
 
@@ -136,34 +148,32 @@ def play_video(file_name):
     if not probe_streams:
         raise Exception("No streams found in ffmpeg probe")
 
-    frame_count = int(probe_streams[0].get("nb_frames") or  24 * float(probe_streams[0]["duration"]))
+    frame_count = int(
+        probe_streams[0].get("nb_frames") or 24 * float(probe_streams[0]["duration"])
+    )
 
     LOGGER.info("There are %d frames in this video", frame_count)
 
-    current_frame = get_progress(file_name, 2000 if frame_count >= 10000 else 0)
+    current_frame = get_progress(video_path, 2000 if frame_count >= 10000 else 0)
+
+    h, s = divmod((((frame_count - current_frame) / INCREMENT) * FRAME_DELAY), 3600)
+    m, s = divmod(s, 60)
 
     LOGGER.info(
-        "It's going to take %d hours to play this video",
-        (((frame_count - current_frame) / INCREMENT) * FRAME_DELAY) / 3600,
+        "It's going to take %ih%im%is to play this video",
+        h,
+        m,
+        s,
     )
 
     for frame in range(current_frame, frame_count, INCREMENT):
-        set_progress(file_name, frame, frame_count)
+        set_progress(video_path, frame, frame_count)
 
-        if not TEST_MODE:
-            # Use ffmpeg to extract a frame from the movie, crop it,
-            # letterbox it and output it as a JPG
-            generate_frame(video_path, frame)
+        # Use ffmpeg to extract a frame from the movie, crop it,
+        # letterbox it and output it as a JPG
+        generate_frame(video_path, frame)
 
-            # Open JPG in PIL and dither the image into a 1 bit bitmap
-            pil_im = Image.open(TMP_FRAME_PATH).convert(
-                mode="1", dither=Image.FLOYDSTEINBERG
-            )
-
-            # display the image
-            DISPLAY.display(DISPLAY.getbuffer(pil_im))
-
-        sleep(FRAME_DELAY)
+        display_image(TMP_FRAME_PATH)
 
 
 def choose_next_video():
@@ -179,50 +189,70 @@ def choose_next_video():
 
     LOGGER.info("There are %i videos in the log", len(log_data))
 
-    for file_name in log_data:
-        if not exists(f"{MOVIE_DIRECTORY}/{file_name}"):
+    for file_path in log_data:
+        if not exists(file_path):
+            LOGGER.debug("`%s` no longer available", file_path)
             continue
 
-        video = log_data[file_name]
+        video = log_data[file_path]
 
         if (total := video.get("total", -1)) - (
             current_frame := video.get("current", -1)
-        ) > INCREMENT * 100:
+        ) > INCREMENT:
             LOGGER.info(
-                "`%s` has only had %i/%i frames played", file_name, current_frame, total
+                "`%s` has only had %i/%i frames played", file_path, current_frame, total
             )
-            return file_name
+            return file_path
 
-    for file in listdir(MOVIE_DIRECTORY):
-        if file not in log_data and file.lower().endswith(".mp4"):
-            LOGGER.info("`%s` hasn't been played yet", file)
-            return file
+    for file_name in listdir(MOVIE_DIRECTORY):
+        file_path = f"{MOVIE_DIRECTORY}/{file_name}"
+        if skip_reason := {
+            not file_name.lower().endswith(".mp4"): f"`{file_name}` is not an mp4",
+            file_path in log_data: f"`{file_path}` has already been played",
+        }.get(True):
+            LOGGER.debug("Skipping: %s", skip_reason)
+            continue
 
-        LOGGER.info("Skipping `%s`", file)
+        LOGGER.info("`%s` hasn't been played yet, returning", file_path)
+        return file_path
 
     return None
 
 
-if __name__ == "__main__":
+def main():
+    """Loops through all videos in the movie directory and then the VSMP Google
+    Photos album
+    """
+
     if not exists(PROGRESS_LOG):
         LOGGER.warning("Progress log not found at `%s`", PROGRESS_LOG)
         with open(PROGRESS_LOG, "w") as _fout:
-            dump(dict(), _fout, indent=4)
+            dump({}, _fout, indent=2)
 
-    if not TEST_MODE:
-        # Initialise and clear the screen
-        DISPLAY.init()
-        DISPLAY.Clear()
+    # Initialise and clear the screen
+    DISPLAY.init()
+    DISPLAY.Clear()
 
     while next_video := choose_next_video():
         try:
             play_video(next_video)
-        except Exception as exc:
-            raise
+        except Exception as exc:  # pylint: disable=broad-except
+            # raise
             LOGGER.exception(
-                f"Unable to play video: `{type(exc).__name__} - {exc.__str__()}`"
+                "Unable to play video: `%s - %s`", type(exc).__name__, exc.__str__()
             )
 
-    if not TEST_MODE:
-        DISPLAY.sleep()
-        implementation.module_exit()
+    for item in GOOGLE.get_album_from_name("Very Slow Movie Player").media_items:
+        item.download()
+
+        if item.media_type == MediaType.VIDEO:
+            play_video(item.local_path)
+        elif item.media_type == MediaType.IMAGE:
+            display_image(item.local_path, 300)
+
+    DISPLAY.sleep()
+    implementation.module_exit()
+
+
+if __name__ == "__main__":
+    main()
