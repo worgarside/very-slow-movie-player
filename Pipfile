@@ -18,6 +18,7 @@ python-dotenv = "*"
 requests = "*"
 google-auth-oauthlib = "*"
 boto3 = "*"
+python-dateutil = { sys_platform = "== 'linux'" }
 
 [requires]
 python_version = "3.8"
