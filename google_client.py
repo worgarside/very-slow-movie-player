@@ -357,7 +357,9 @@ class GoogleClient:
                 )
 
                 auth_uri = flow.authorization_url()
-                open_browser(auth_uri[0])
+                auth_url = auth_uri[0]
+                LOGGER.debug("Opening %s", auth_url)
+                open_browser(auth_url)
                 code = input("Enter the authorization code: ")
                 flow.fetch_token(code=code)
 
