@@ -50,28 +50,74 @@ GOOGLE = GoogleClient(
 
 MOVIE_DIRECTORY = f"{Path.home()}/movies"
 INCREMENT = 12
-TMP_FRAME_PATH = "/tmp/vsmp_frame.jpg"
+EXTRACT_PATH = "/tmp/vsmp_extract.jpg"
+FRAME_PATH = "/tmp/vsmp_frame2.jpg"
 
 PROGRESS_LOG = f"{abspath(dirname(__file__))}/progress_log.json"
 
 
-def generate_frame(in_filename, frame):
+def extract_frame(video_path, frame, extract_output_path=EXTRACT_PATH):
     """Output a frame from the video file to a JPG image to be displayed on
     the E-Paper display
 
-    Args:
-        in_filename (str): the name of the file to extract the frame from
-        frame (int): the number of the frame to extract
-    """
+    Steps:
+      - ffmpeg_input: takes a filepath as input and opens the video
+        - filename: the name of the file to import
+        - ss: the position to seek to
+      - filter*:
+        - scale: resizes the image
+        - force_original_aspect_ratio: set to "decrease", forcing image to be
+           downsized if necessary
+      - filter*:
+        - pad: letterboxes the image
+        - -1, -1: x and y coords to place image at within padded area - negative
+           defaults to centre
 
-    (
-        ffmpeg_input(in_filename, ss=f"{frame * 41.666666}ms")
+    * These have been replaced by the `format_image` function. Original lines were:
         .filter("scale", EPD_WIDTH, EPD_HEIGHT, force_original_aspect_ratio=1)
         .filter("pad", EPD_WIDTH, EPD_HEIGHT, -1, -1)
-        .output(TMP_FRAME_PATH, vframes=1)
+
+    Args:
+        video_path (str): the name of the file to extract the frame from
+        frame (int): the number of the frame to extract
+        extract_output_path (str): the path at which to place the extracted image file
+    """
+
+    LOGGER.info("Extracting frame %i from `%s`", frame, video_path)
+
+    (
+        ffmpeg_input(video_path, ss=f"{frame * 41.666666}ms")
+        .output(extract_output_path, vframes=1)
         .overwrite_output()
         .run(capture_stdout=True, capture_stderr=True)
     )
+
+
+def format_image(image_path, frame_output_path=FRAME_PATH):
+    """Formats an image for displaying on the EPD
+
+    Args:
+        image_path (str): the name of the file to format
+        frame_output_path (str): the path at which to place the frame image file
+    """
+    pil_im = Image.open(image_path)
+
+    scale_factor = min(EPD_WIDTH / pil_im.size[0], EPD_HEIGHT / pil_im.size[1])
+
+    resize_width = round(pil_im.size[0] * scale_factor)
+    resize_height = round(pil_im.size[1] * scale_factor)
+
+    pil_im = pil_im.resize((resize_width, resize_height), Image.ANTIALIAS)
+
+    letterboxed = Image.new("RGB", (EPD_WIDTH, EPD_HEIGHT))
+    offset = (
+        round((EPD_WIDTH - resize_width) / 2),
+        round((EPD_HEIGHT - resize_height) / 2),
+    )
+
+    letterboxed.paste(pil_im, offset)
+
+    letterboxed.save(frame_output_path)
 
 
 def get_progress(file_name, default=0):
@@ -117,10 +163,21 @@ def set_progress(video_path, current_frame, frame_count=None):
         dump(log_data, fout, indent=2)
 
 
-def display_image(image_path, display_time=FRAME_DELAY):
+def display_image(image_path=FRAME_PATH, display_time=FRAME_DELAY):
+    """Display an image on the EPD
+
+    Args:
+        image_path (str): the path to the file to display on the EPD
+        display_time (Union([int, float])): the number of seconds to display the
+         image for
+    """
+
+    format_image(image_path)
+
     LOGGER.info("Displaying `%s` for %s seconds", image_path, display_time)
+
     # Open JPG in PIL and dither the image into a 1 bit bitmap
-    pil_im = Image.open(image_path).convert(mode="1", dither=Image.FLOYDSTEINBERG)
+    pil_im = Image.open(FRAME_PATH).convert(mode="1", dither=Image.FLOYDSTEINBERG)
 
     # display the image
     DISPLAY.display(DISPLAY.getbuffer(pil_im))
@@ -171,9 +228,9 @@ def play_video(video_path):
 
         # Use ffmpeg to extract a frame from the movie, crop it,
         # letterbox it and output it as a JPG
-        generate_frame(video_path, frame)
+        extract_frame(video_path, frame)
 
-        display_image(TMP_FRAME_PATH)
+        display_image(EXTRACT_PATH)
 
 
 def choose_next_video():
@@ -243,7 +300,7 @@ def main():
             )
 
     for item in GOOGLE.get_album_from_name("Very Slow Movie Player").media_items:
-        item.download()
+        item.download(width_override=EPD_WIDTH, height_override=EPD_HEIGHT)
 
         if item.media_type == MediaType.VIDEO:
             play_video(item.local_path)
