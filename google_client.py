@@ -243,6 +243,7 @@ class GoogleClient:
     DEFAULT_PARAMS = {
         "pageSize": "50",
     }
+    CREDS_FILE_PATH = join(abspath(dirname(__file__)), "google_api_creds.json")
 
     def __init__(self, project, scopes=None):
         self.project = project
@@ -288,10 +289,10 @@ class GoogleClient:
 
         return item_list
 
-    @staticmethod
-    def delete_creds_file():
+    def delete_creds_file(self):
+        """Delete the local creds file"""
         try:
-            remove("./google_api_creds.json")
+            remove(self.CREDS_FILE_PATH)
         except FileNotFoundError:
             pass
 
@@ -337,13 +338,13 @@ class GoogleClient:
     @property
     def credentials(self):
         try:
-            with open("./google_api_creds.json") as fin:
+            with open(self.CREDS_FILE_PATH) as fin:
                 self._all_credentials = load(fin)
         except FileNotFoundError:
+            LOGGER.info("Unable to find local creds file")
             self._all_credentials = {}
 
         with NamedTemporaryFile() as tmp_client_id_json:
-
             if self.project not in self._all_credentials:
                 LOGGER.info("Performing first time login for `%s`", self.project)
 
@@ -388,7 +389,7 @@ class GoogleClient:
         """
         self._all_credentials[self.project] = value
 
-        with open("./google_api_creds.json", "w") as fout:
+        with open(self.CREDS_FILE_PATH, "w") as fout:
             dump(self._all_credentials, fout)
 
     @property
