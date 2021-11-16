@@ -2,9 +2,10 @@ from datetime import datetime
 from json import dump, load
 from logging import getLogger, StreamHandler, FileHandler, DEBUG, Formatter
 from os import listdir, mkdir
-from os.path import exists, dirname, abspath
+from os.path import exists, dirname, abspath, join
 from pathlib import Path
 from sys import stdout
+from tempfile import gettempdir
 from time import sleep
 
 from PIL import Image
@@ -16,10 +17,10 @@ from google_client import GoogleClient, MediaType
 LOGGER = getLogger(__name__)
 LOGGER.setLevel(DEBUG)
 
-LOG_DIR = f"{Path.home()}/logs/very-slow-movie-player"
+LOG_DIR = join(Path.home(), "logs", "very-slow-movie-player")
 
 try:
-    mkdir(f"{Path.home()}/logs")
+    mkdir(join(Path.home(), "logs"))
 except FileExistsError:
     pass
 
@@ -29,7 +30,7 @@ except FileExistsError:
     pass
 
 SH = StreamHandler(stdout)
-FH = FileHandler(f"{LOG_DIR}/{datetime.today().strftime('%Y-%m-%d')}.log")
+FH = FileHandler(join(LOG_DIR, f"{datetime.today().strftime('%Y-%m-%d')}.log"))
 
 FORMATTER = Formatter(
     "%(asctime)s\t%(name)s\t[%(levelname)s]\t%(message)s", "%Y-%m-%d %H:%M:%S"
@@ -38,6 +39,8 @@ FH.setFormatter(FORMATTER)
 SH.setFormatter(FORMATTER)
 LOGGER.addHandler(FH)
 LOGGER.addHandler(SH)
+
+LOGGER.debug("Temp directory is `%s`", gettempdir())
 
 DISPLAY = EPD()
 GOOGLE = GoogleClient(
@@ -48,12 +51,12 @@ GOOGLE = GoogleClient(
     ],
 )
 
-MOVIE_DIRECTORY = f"{Path.home()}/movies"
-INCREMENT = 12
-EXTRACT_PATH = "/tmp/vsmp_extract.jpg"
-FRAME_PATH = "/tmp/vsmp_frame2.jpg"
+MOVIE_DIRECTORY = join(Path.home(), "movies")
+EXTRACT_PATH = join(gettempdir(), "vsmp_extract.jpg")
+FRAME_PATH = join(gettempdir(), "vsmp_frame.jpg")
+PROGRESS_LOG = join(abspath(dirname(__file__)), "progress_log.json")
 
-PROGRESS_LOG = f"{abspath(dirname(__file__))}/progress_log.json"
+INCREMENT = 12
 
 
 def extract_frame(video_path, frame, extract_output_path=EXTRACT_PATH):
@@ -262,7 +265,7 @@ def choose_next_video():
             return file_path
 
     for file_name in listdir(MOVIE_DIRECTORY):
-        file_path = f"{MOVIE_DIRECTORY}/{file_name}"
+        file_path = join(MOVIE_DIRECTORY, file_name)
         if skip_reason := {
             not file_name.lower().endswith(".mp4"): f"`{file_name}` is not an mp4",
             file_path in log_data: f"`{file_path}` has already been played",
