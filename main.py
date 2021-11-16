@@ -4,6 +4,7 @@ from logging import getLogger, StreamHandler, FileHandler, DEBUG, Formatter
 from os import listdir, mkdir
 from os.path import exists, dirname, abspath, join
 from pathlib import Path
+from random import shuffle
 from sys import stdout
 from tempfile import gettempdir
 from time import sleep
@@ -302,13 +303,15 @@ def main():
                 "Unable to play video: `%s - %s`", type(exc).__name__, exc.__str__()
             )
 
-    for item in GOOGLE.get_album_from_name("Very Slow Movie Player").media_items:
+    media_items = GOOGLE.get_album_from_name("Very Slow Movie Player").media_items
+    shuffle(media_items)
+    for item in media_items:
         item.download(width_override=EPD_WIDTH, height_override=EPD_HEIGHT)
 
         if item.media_type == MediaType.VIDEO:
             play_video(item.local_path)
         elif item.media_type == MediaType.IMAGE:
-            display_image(item.local_path, 300)
+            display_image(item.local_path, 120)
 
     DISPLAY.sleep()
     implementation.module_exit()
