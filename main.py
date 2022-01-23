@@ -1,45 +1,37 @@
 from datetime import datetime
 from json import dump, load
-from logging import getLogger, StreamHandler, FileHandler, DEBUG, Formatter
-from os import listdir, mkdir
+from logging import getLogger, DEBUG
+from os import listdir
 from os.path import exists, dirname, abspath, join
 from pathlib import Path
 from random import shuffle
-from sys import stdout
 from tempfile import gettempdir
 from time import sleep
-
+from sys import path as sys_path
 from PIL import Image
+from wg_utilities.clients import GoogleClient, MediaType
+from wg_utilities.epd import EPD, EPD_WIDTH, EPD_HEIGHT, implementation, FRAME_DELAY
+from wg_utilities.functions import force_mkdir
+from wg_utilities.loggers import add_file_handler, add_stream_handler
 
-from epd import EPD, EPD_WIDTH, EPD_HEIGHT, implementation, FRAME_DELAY
 from ffmpeg import input as ffmpeg_input, probe
-from google_client import GoogleClient, MediaType
 
 LOGGER = getLogger(__name__)
 LOGGER.setLevel(DEBUG)
 
-LOG_DIR = join(Path.home(), "logs", "very-slow-movie-player")
-
-try:
-    mkdir(join(Path.home(), "logs"))
-except FileExistsError:
-    pass
-
-try:
-    mkdir(LOG_DIR)
-except FileExistsError:
-    pass
-
-SH = StreamHandler(stdout)
-FH = FileHandler(join(LOG_DIR, f"{datetime.today().strftime('%Y-%m-%d')}.log"))
-
-FORMATTER = Formatter(
-    "%(asctime)s\t%(name)s\t[%(levelname)s]\t%(message)s", "%Y-%m-%d %H:%M:%S"
+add_file_handler(
+    LOGGER,
+    logfile_path=force_mkdir(
+        join(
+            Path.home(),
+            "logs",
+            "very-slow-movie-player",
+            f"{datetime.today().strftime('%Y-%m-%d')}.log",
+        ),
+        path_is_file=True,
+    ),
 )
-FH.setFormatter(FORMATTER)
-SH.setFormatter(FORMATTER)
-LOGGER.addHandler(FH)
-LOGGER.addHandler(SH)
+add_stream_handler(LOGGER)
 
 LOGGER.debug("Temp directory is `%s`", gettempdir())
 
@@ -125,7 +117,7 @@ def format_image(image_path, frame_output_path=FRAME_PATH):
 
 
 def get_progress(file_name, default=0):
-    """Get the number of the most recently played frame from the JSON log file
+    """Get the number of the most recently played frame from the JSON log file,
      so we can resume in the case of an early exit
 
     Args:
@@ -135,7 +127,7 @@ def get_progress(file_name, default=0):
     Returns:
         int: the number of the frame that was played most recently
     """
-    with open(PROGRESS_LOG) as fin:
+    with open(PROGRESS_LOG, encoding="UTF-8") as fin:
         log_data = load(fin)
 
     LOGGER.info("Getting progress for `%s`", file_name)
@@ -144,14 +136,14 @@ def get_progress(file_name, default=0):
 
 
 def set_progress(video_path, current_frame, frame_count=None):
-    """Update the JSON log file so we can resume if the program is exited
+    """Update the JSON log file, so we can resume if the program is exited
 
     Args:
         video_path (str): the path to the file being played
         current_frame (int): which frame has been played most recently
         frame_count (int): the total number of frames in the video
     """
-    with open(PROGRESS_LOG) as fin:
+    with open(PROGRESS_LOG, encoding="UTF-8") as fin:
         log_data = load(fin)
 
     progress = {video_path: {"current": current_frame}}
@@ -163,7 +155,7 @@ def set_progress(video_path, current_frame, frame_count=None):
 
     log_data.update(progress)
 
-    with open(PROGRESS_LOG, "w") as fout:
+    with open(PROGRESS_LOG, "w", encoding="UTF-8") as fout:
         dump(log_data, fout, indent=2)
 
 
@@ -197,6 +189,7 @@ def play_video(video_path):
 
     Raises:
         FileNotFoundError: if the video path doesn't exist
+        Exception: if the video file is un-usable for some reason
     """
 
     LOGGER.info("Input video is `%s`", video_path)
@@ -217,14 +210,16 @@ def play_video(video_path):
 
     current_frame = get_progress(video_path, 2000 if frame_count >= 10000 else 0)
 
-    h, s = divmod((((frame_count - current_frame) / INCREMENT) * FRAME_DELAY), 3600)
-    m, s = divmod(s, 60)
+    hrs, secs = divmod(
+        (((frame_count - current_frame) / INCREMENT) * FRAME_DELAY), 3600
+    )
+    mins, secs = divmod(secs, 60)
 
     LOGGER.info(
         "It's going to take %ih%im%is to play this video",
-        h,
-        m,
-        s,
+        hrs,
+        mins,
+        secs,
     )
 
     for frame in range(current_frame, frame_count, INCREMENT):
@@ -245,7 +240,7 @@ def choose_next_video():
         str: the name of the video file to start playing
     """
 
-    with open(PROGRESS_LOG) as fin:
+    with open(PROGRESS_LOG, encoding="UTF-8") as fin:
         log_data = load(fin)
 
     LOGGER.info("There are %i videos in the log", len(log_data))
@@ -287,21 +282,21 @@ def main():
 
     if not exists(PROGRESS_LOG):
         LOGGER.warning("Progress log not found at `%s`", PROGRESS_LOG)
-        with open(PROGRESS_LOG, "w") as _fout:
+        with open(PROGRESS_LOG, "w", encoding="UTF-8") as _fout:
             dump({}, _fout, indent=2)
 
     # Initialise and clear the screen
     DISPLAY.init()
-    DISPLAY.Clear()
+    DISPLAY.clear()
 
-    while next_video := choose_next_video():
-        try:
-            play_video(next_video)
-        except Exception as exc:  # pylint: disable=broad-except
-            # raise
-            LOGGER.exception(
-                "Unable to play video: `%s - %s`", type(exc).__name__, exc.__str__()
-            )
+    # while next_video := choose_next_video():
+    #     try:
+    #         play_video(next_video)
+    #     except Exception as exc:  # pylint: disable=broad-except
+    #         # raise
+    #         LOGGER.exception(
+    #             "Unable to play video: `%s - %s`", type(exc).__name__, exc.__str__()
+    #         )
 
     media_items = GOOGLE.get_album_from_name("Very Slow Movie Player").media_items
     shuffle(media_items)

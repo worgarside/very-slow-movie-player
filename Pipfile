@@ -19,6 +19,7 @@ requests = "*"
 google-auth-oauthlib = "*"
 boto3 = "*"
 python-dateutil = { sys_platform = "== 'linux'" }
+wg-utilities = "*"
 
 [requires]
 python_version = "3.8"
