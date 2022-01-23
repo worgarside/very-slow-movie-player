@@ -42,6 +42,7 @@ GOOGLE = GoogleClient(
         "https://www.googleapis.com/auth/photoslibrary",
         "https://www.googleapis.com/auth/photoslibrary.sharing",
     ],
+    join(abspath(dirname(__file__)), "client_id.json"),
 )
 
 MOVIE_DIRECTORY = join(Path.home(), "movies")
