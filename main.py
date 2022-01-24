@@ -7,14 +7,16 @@ from pathlib import Path
 from random import shuffle
 from tempfile import gettempdir
 from time import sleep
-from sys import path as sys_path
 from PIL import Image
+from dotenv import load_dotenv
 from wg_utilities.clients import GoogleClient, MediaType
 from wg_utilities.epd import EPD, EPD_WIDTH, EPD_HEIGHT, implementation, FRAME_DELAY
 from wg_utilities.functions import force_mkdir
 from wg_utilities.loggers import add_file_handler, add_stream_handler
 
 from ffmpeg import input as ffmpeg_input, probe
+
+load_dotenv()
 
 LOGGER = getLogger(__name__)
 LOGGER.setLevel(DEBUG)
