@@ -9,8 +9,8 @@ from tempfile import gettempdir
 from time import sleep
 from PIL import Image
 from dotenv import load_dotenv
-from wg_utilities.clients import GoogleClient
-from wg_utilities.clients.google import MediaType
+from wg_utilities.clients import GooglePhotosClient
+from wg_utilities.clients.google_photos import MediaType
 from wg_utilities.epd import EPD, EPD_WIDTH, EPD_HEIGHT, implementation, FRAME_DELAY
 from wg_utilities.functions import force_mkdir
 from wg_utilities.loggers import add_file_handler, add_stream_handler
@@ -39,7 +39,7 @@ add_stream_handler(LOGGER)
 LOGGER.debug("Temp directory is `%s`", gettempdir())
 
 DISPLAY = EPD()
-GOOGLE = GoogleClient(
+GOOGLE = GooglePhotosClient(
     "very-slow-movie-player",
     [
         "https://www.googleapis.com/auth/photoslibrary",
