@@ -310,7 +310,7 @@ def main():
         if item.media_type == MediaType.VIDEO:
             play_video(item.local_path)
         elif item.media_type == MediaType.IMAGE:
-            display_image(item.local_path, 120)
+            display_image(item.local_path, 300)
 
     DISPLAY.sleep()
     implementation.module_exit()
