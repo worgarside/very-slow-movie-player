@@ -1227,11 +1227,11 @@
         },
         "pre-commit": {
             "hashes": [
-                "sha256:725fa7459782d7bec5ead072810e47351de01709be838c2ce1726b9591dad616",
-                "sha256:c1a8040ff15ad3d648c70cc3e55b93e4d2d5b687320955505587fd79bbaed06a"
+                "sha256:51a5ba7c480ae8072ecdb6933df22d2f812dc897d5fe848778116129a681aac7",
+                "sha256:a978dac7bc9ec0bcee55c18a277d553b0f419d259dadb4b9418ff2d00eb43959"
             ],
             "index": "pypi",
-            "version": "==2.17.0"
+            "version": "==2.20.0"
         },
         "pylint": {
             "hashes": [
@@ -1309,7 +1309,7 @@
                 "sha256:25642c956049920a5aa49edcdd6ab1e06d7e5d467fc00e0506c44ac86fbfca02",
                 "sha256:e6d2677a32f47fc7eb2795db1dd15c1f34eff616bcaf2cfb5e997f854fa1c4a6"
             ],
-            "markers": "python_version < '3.10'",
+            "markers": "python_version >= '3.7'",
             "version": "==4.3.0"
         },
         "virtualenv": {
