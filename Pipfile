@@ -20,6 +20,7 @@ google-auth-oauthlib = "*"
 boto3 = "*"
 python-dateutil = { sys_platform = "== 'linux'" }
 wg-utilities = {extras = ["clients", "epd", "exceptions"], version = "*"}
+pydantic = "*"
 
 [requires]
 python_version = "3.8"

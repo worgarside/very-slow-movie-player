@@ -1,21 +1,26 @@
+"""Currently just displays photos from an album on Google Photos, but used to display
+ videos too"""
 from datetime import datetime
 from json import dump, load
-from logging import getLogger, DEBUG
+from logging import DEBUG, getLogger
 from os import listdir
-from os.path import exists, dirname, abspath, join
+from os.path import abspath, dirname, exists, join
 from pathlib import Path
 from random import shuffle
 from tempfile import gettempdir
 from time import sleep
-from PIL import Image
+from typing import Dict, Optional, TypedDict, Union
+
 from dotenv import load_dotenv
+from PIL import Image
 from wg_utilities.clients import GooglePhotosClient
 from wg_utilities.clients.google_photos import MediaType
-from wg_utilities.epd import EPD, EPD_WIDTH, EPD_HEIGHT, implementation, FRAME_DELAY
+from wg_utilities.epd import EPD, EPD_HEIGHT, EPD_WIDTH, FRAME_DELAY, implementation
 from wg_utilities.functions import force_mkdir
 from wg_utilities.loggers import add_file_handler, add_stream_handler
 
-from ffmpeg import input as ffmpeg_input, probe
+from ffmpeg import input as ffmpeg_input  # pylint: disable=no-name-in-module
+from ffmpeg import probe  # pylint: disable=no-name-in-module
 
 load_dotenv()
 
@@ -56,7 +61,16 @@ PROGRESS_LOG = join(abspath(dirname(__file__)), "progress_log.json")
 INCREMENT = 12
 
 
-def extract_frame(video_path, frame, extract_output_path=EXTRACT_PATH):
+class ProgressInfo(TypedDict):
+    """Model for the progress info objects in the log"""
+
+    current: int
+    total: int
+
+
+def extract_frame(
+    video_path: str, frame: int, extract_output_path: str = EXTRACT_PATH
+) -> None:
     """Output a frame from the video file to a JPG image to be displayed on
     the E-Paper display
 
@@ -93,7 +107,7 @@ def extract_frame(video_path, frame, extract_output_path=EXTRACT_PATH):
     )
 
 
-def format_image(image_path, frame_output_path=FRAME_PATH):
+def format_image(image_path: str, frame_output_path: str = FRAME_PATH) -> None:
     """Formats an image for displaying on the EPD
 
     Args:
@@ -120,7 +134,7 @@ def format_image(image_path, frame_output_path=FRAME_PATH):
     letterboxed.save(frame_output_path)
 
 
-def get_progress(file_name, default=0):
+def get_progress(file_name: str, default: int = 0) -> int:
     """Get the number of the most recently played frame from the JSON log file,
      so we can resume in the case of an early exit
 
@@ -132,14 +146,19 @@ def get_progress(file_name, default=0):
         int: the number of the frame that was played most recently
     """
     with open(PROGRESS_LOG, encoding="UTF-8") as fin:
-        log_data = load(fin)
+        log_data: Dict[str, ProgressInfo] = load(fin)
 
     LOGGER.info("Getting progress for `%s`", file_name)
 
-    return log_data.get(file_name, {}).get("current", default)
+    try:
+        return log_data[file_name]["current"]
+    except KeyError:
+        return default
 
 
-def set_progress(video_path, current_frame, frame_count=None):
+def set_progress(
+    video_path: str, current_frame: int, frame_count: Optional[int] = None
+) -> None:
     """Update the JSON log file, so we can resume if the program is exited
 
     Args:
@@ -163,7 +182,9 @@ def set_progress(video_path, current_frame, frame_count=None):
         dump(log_data, fout, indent=2)
 
 
-def display_image(image_path=FRAME_PATH, display_time=FRAME_DELAY):
+def display_image(
+    image_path: str = FRAME_PATH, display_time: Union[int, float] = FRAME_DELAY
+) -> None:
     """Display an image on the EPD
 
     Args:
@@ -185,7 +206,7 @@ def display_image(image_path=FRAME_PATH, display_time=FRAME_DELAY):
     sleep(display_time)
 
 
-def play_video(video_path):
+def play_video(video_path: str) -> None:
     """Play a video file on the E-Paper display
 
     Args:
@@ -236,7 +257,7 @@ def play_video(video_path):
         display_image(EXTRACT_PATH)
 
 
-def choose_next_video():
+def choose_next_video() -> Optional[str]:
     """Pick which video to play next. Either find one that hasn't yet been
     finished, or one that hasn't even been started
 
@@ -245,7 +266,7 @@ def choose_next_video():
     """
 
     with open(PROGRESS_LOG, encoding="UTF-8") as fin:
-        log_data = load(fin)
+        log_data: Dict[str, ProgressInfo] = load(fin)
 
     LOGGER.info("There are %i videos in the log", len(log_data))
 
@@ -279,7 +300,7 @@ def choose_next_video():
     return None
 
 
-def main():
+def main() -> None:
     """Loops through all videos in the movie directory and then the VSMP Google
     Photos album
     """
