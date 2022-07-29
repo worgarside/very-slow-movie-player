@@ -555,11 +555,11 @@
                 "exceptions"
             ],
             "hashes": [
-                "sha256:789b34b8710e8a1e88ec13ca44add50f59cc04b37f2e0fe0ac726336f24f5b73",
-                "sha256:a06dcc7a58a11a0b41ab74bcd8ab01cf445a93af8637d39ec0ee37c31269aba7"
+                "sha256:24891024c71b66fe14430f1f65098899b9cfb51e0f2ecaa58b2967b264077fee",
+                "sha256:d708a5374c883cfc2b33f90addea3149d93562e0de98630712fe7f49d48fd2e2"
             ],
             "index": "pypi",
-            "version": "==2.25.0"
+            "version": "==2.26.1"
         },
         "wrapt": {
             "hashes": [
