@@ -16,7 +16,7 @@ from PIL import Image
 from wg_utilities.clients import GooglePhotosClient
 from wg_utilities.clients.google_photos import MediaType
 from wg_utilities.epd import EPD, EPD_HEIGHT, EPD_WIDTH, FRAME_DELAY, implementation
-from wg_utilities.functions import force_mkdir
+from wg_utilities.exceptions import on_exception  # pylint: disable=no-name-in-module
 from wg_utilities.loggers import add_file_handler, add_stream_handler
 
 from ffmpeg import input as ffmpeg_input  # pylint: disable=no-name-in-module
@@ -29,14 +29,11 @@ LOGGER.setLevel(DEBUG)
 
 add_file_handler(
     LOGGER,
-    logfile_path=force_mkdir(
-        join(
-            Path.home(),
-            "logs",
-            "very-slow-movie-player",
-            f"{datetime.today().strftime('%Y-%m-%d')}.log",
-        ),
-        path_is_file=True,
+    logfile_path=join(
+        Path.home(),
+        "logs",
+        "very-slow-movie-player",
+        f"{datetime.today().strftime('%Y-%m-%d')}.log",
     ),
 )
 add_stream_handler(LOGGER)
@@ -68,6 +65,7 @@ class ProgressInfo(TypedDict):
     total: int
 
 
+@on_exception()  # type: ignore[misc]
 def extract_frame(
     video_path: str, frame: int, extract_output_path: str = EXTRACT_PATH
 ) -> None:
@@ -107,6 +105,7 @@ def extract_frame(
     )
 
 
+@on_exception()  # type: ignore[misc]
 def format_image(image_path: str, frame_output_path: str = FRAME_PATH) -> None:
     """Formats an image for displaying on the EPD
 
@@ -134,6 +133,7 @@ def format_image(image_path: str, frame_output_path: str = FRAME_PATH) -> None:
     letterboxed.save(frame_output_path)
 
 
+@on_exception()  # type: ignore[misc]
 def get_progress(file_name: str, default: int = 0) -> int:
     """Get the number of the most recently played frame from the JSON log file,
      so we can resume in the case of an early exit
@@ -156,6 +156,7 @@ def get_progress(file_name: str, default: int = 0) -> int:
         return default
 
 
+@on_exception()  # type: ignore[misc]
 def set_progress(
     video_path: str, current_frame: int, frame_count: Optional[int] = None
 ) -> None:
@@ -182,6 +183,7 @@ def set_progress(
         dump(log_data, fout, indent=2)
 
 
+@on_exception()  # type: ignore[misc]
 def display_image(
     image_path: str = FRAME_PATH, display_time: Union[int, float] = FRAME_DELAY
 ) -> None:
@@ -206,6 +208,7 @@ def display_image(
     sleep(display_time)
 
 
+@on_exception()  # type: ignore[misc]
 def play_video(video_path: str) -> None:
     """Play a video file on the E-Paper display
 
@@ -257,6 +260,7 @@ def play_video(video_path: str) -> None:
         display_image(EXTRACT_PATH)
 
 
+@on_exception()  # type: ignore[misc]
 def choose_next_video() -> Optional[str]:
     """Pick which video to play next. Either find one that hasn't yet been
     finished, or one that hasn't even been started
@@ -300,6 +304,7 @@ def choose_next_video() -> Optional[str]:
     return None
 
 
+@on_exception()  # type: ignore[misc]
 def main() -> None:
     """Loops through all videos in the movie directory and then the VSMP Google
     Photos album

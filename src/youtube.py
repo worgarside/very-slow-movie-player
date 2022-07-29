@@ -7,6 +7,7 @@ from typing import Dict, List, Literal
 from dotenv import load_dotenv
 from pydantic import BaseModel
 from requests import get
+from wg_utilities.exceptions import on_exception  # pylint: disable=no-name-in-module
 from youtube_dl import YoutubeDL
 
 load_dotenv()
@@ -74,6 +75,7 @@ class YouTubeVideoInfo(BaseModel):
         )
 
 
+@on_exception()  # type: ignore[misc]
 def get_playlist_content(playlist_id: str) -> List[YouTubeVideoInfo]:
     """Get the content of a public playlist on YouTube
 
@@ -121,6 +123,7 @@ def get_playlist_content(playlist_id: str) -> List[YouTubeVideoInfo]:
     return playlist_items
 
 
+@on_exception()  # type: ignore[misc]
 def main() -> None:
     """Iterates through the playlist and downloads each video"""
 
