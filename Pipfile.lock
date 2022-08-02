@@ -56,11 +56,11 @@
         },
         "botocore": {
             "hashes": [
-                "sha256:38a180a6666c5a9b069a75ec3cf374ff2a64c3e90c9f24a916858bcdeb04456d",
-                "sha256:f8e6c2f69a9d577fb9c69e4e74f49f4315a48decee0e7dc88b6e470772110884"
+                "sha256:3cfe585e90069e8e7b6ec10855976d974ec13a53bbf9b1a0f77193804be7cb17",
+                "sha256:ade148d0e29f633f429ea6c7ea215e173c64e8b155e574950892aa4eade969d0"
             ],
             "markers": "python_version >= '3.7'",
-            "version": "==1.27.42"
+            "version": "==1.27.43"
         },
         "cachetools": {
             "hashes": [
@@ -112,11 +112,11 @@
         },
         "flask": {
             "hashes": [
-                "sha256:15972e5017df0575c3d6c090ba168b6db90259e620ac8d7ea813a396bad5b6cb",
-                "sha256:9013281a7402ad527f8fd56375164f3aa021ecfaff89bfe3825346c24f87e04c"
+                "sha256:10dc2bae7a9b6ab59111d6dbece2e08fb0015d2e88d296c40323cc0c7aac2c2e",
+                "sha256:98b33b13ad76ee9c7a80d2f56a6c578780e55bf8281790c62d50d4b7fadec2b8"
             ],
             "markers": "python_version >= '3.7'",
-            "version": "==2.1.3"
+            "version": "==2.2.0"
         },
         "future": {
             "hashes": [
@@ -558,11 +558,11 @@
                 "exceptions"
             ],
             "hashes": [
-                "sha256:24891024c71b66fe14430f1f65098899b9cfb51e0f2ecaa58b2967b264077fee",
-                "sha256:d708a5374c883cfc2b33f90addea3149d93562e0de98630712fe7f49d48fd2e2"
+                "sha256:58affe3281305666aa7d8ff8a278f4d1cb4ebe245974e4d12ddcc4b9d69a751c",
+                "sha256:ca5299cff016b2c66708476e9522061e1042c3d0050796777a486fb85bddbc98"
             ],
             "index": "pypi",
-            "version": "==2.26.1"
+            "version": "==2.27.0"
         },
         "wrapt": {
             "hashes": [
@@ -901,7 +901,7 @@
                 "sha256:939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc",
                 "sha256:de526c12914f0c550d15924c62d72abc48d6fe7364aa87328337a31007fe8a4f"
             ],
-            "markers": "python_full_version < '3.11.0a7'",
+            "markers": "python_version < '3.11'",
             "version": "==2.0.1"
         },
         "tomlkit": {
