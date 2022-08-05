@@ -13,9 +13,16 @@ from typing import Dict, Optional, TypedDict, Union
 
 from dotenv import load_dotenv
 from PIL import Image
+from PIL.Image import Dither, Resampling  # type: ignore[attr-defined]
 from wg_utilities.clients import GooglePhotosClient
 from wg_utilities.clients.google_photos import MediaType
-from wg_utilities.epd import EPD, EPD_HEIGHT, EPD_WIDTH, FRAME_DELAY, implementation
+from wg_utilities.devices.epd import (  # pylint: disable=no-name-in-module
+    EPD,
+    EPD_HEIGHT,
+    EPD_WIDTH,
+    FRAME_DELAY,
+    implementation,
+)
 from wg_utilities.exceptions import on_exception  # pylint: disable=no-name-in-module
 from wg_utilities.loggers import add_file_handler, add_stream_handler
 
@@ -120,7 +127,7 @@ def format_image(image_path: str, frame_output_path: str = FRAME_PATH) -> None:
     resize_width = round(pil_im.size[0] * scale_factor)
     resize_height = round(pil_im.size[1] * scale_factor)
 
-    pil_im = pil_im.resize((resize_width, resize_height), Image.ANTIALIAS)
+    pil_im = pil_im.resize((resize_width, resize_height), Resampling.LANCZOS)
 
     letterboxed = Image.new("RGB", (EPD_WIDTH, EPD_HEIGHT))
     offset = (
@@ -200,7 +207,7 @@ def display_image(
     LOGGER.info("Displaying `%s` for %s seconds", image_path, display_time)
 
     # Open JPG in PIL and dither the image into a 1 bit bitmap
-    pil_im = Image.open(FRAME_PATH).convert(mode="1", dither=Image.FLOYDSTEINBERG)
+    pil_im = Image.open(FRAME_PATH).convert(mode="1", dither=Dither.FLOYDSTEINBERG)
 
     # display the image
     DISPLAY.display(DISPLAY.getbuffer(pil_im))
