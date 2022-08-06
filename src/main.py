@@ -72,10 +72,10 @@ class ProgressInfo(TypedDict):
     total: int
 
 
-@on_exception()  # type: ignore[misc]
+@on_exception(logger=LOGGER)  # type: ignore[misc]
 def extract_frame(
-    video_path: str, frame: int, extract_output_path: str = EXTRACT_PATH
-) -> None:
+    video_path: str, frame: int, *, extract_output_path: str = EXTRACT_PATH
+) -> str:
     """Output a frame from the video file to a JPG image to be displayed on
     the E-Paper display
 
@@ -100,9 +100,12 @@ def extract_frame(
         video_path (str): the name of the file to extract the frame from
         frame (int): the number of the frame to extract
         extract_output_path (str): the path at which to place the extracted image file
+
+    Returns:
+        str: the output path, again provided for ease of use
     """
 
-    LOGGER.info("Extracting frame %i from `%s`", frame, video_path)
+    LOGGER.info("Extracting frame #%i from `%s`", frame, video_path)
 
     (
         ffmpeg_input(video_path, ss=f"{frame * 41.666666}ms")
@@ -111,15 +114,26 @@ def extract_frame(
         .run(capture_stdout=True, capture_stderr=True)
     )
 
+    return extract_output_path
 
-@on_exception()  # type: ignore[misc]
-def format_image(image_path: str, frame_output_path: str = FRAME_PATH) -> None:
+
+@on_exception(logger=LOGGER)  # type: ignore[misc]
+def format_image(image_path: str, frame_output_path: str = FRAME_PATH) -> str:
     """Formats an image for displaying on the EPD
 
     Args:
         image_path (str): the name of the file to format
         frame_output_path (str): the path at which to place the frame image file
+
+    Returns:
+        str: the output path - the user will know this anyway, but it's done for ease
+         of use
     """
+
+    LOGGER.debug(
+        "Formatting image `%s`, outputting to `%s`", image_path, frame_output_path
+    )
+
     pil_im = Image.open(image_path)
 
     scale_factor = min(EPD_WIDTH / pil_im.size[0], EPD_HEIGHT / pil_im.size[1])
@@ -139,8 +153,10 @@ def format_image(image_path: str, frame_output_path: str = FRAME_PATH) -> None:
 
     letterboxed.save(frame_output_path)
 
+    return frame_output_path
 
-@on_exception()  # type: ignore[misc]
+
+@on_exception(logger=LOGGER)  # type: ignore[misc]
 def get_progress(file_name: str, default: int = 0) -> int:
     """Get the number of the most recently played frame from the JSON log file,
      so we can resume in the case of an early exit
@@ -163,7 +179,7 @@ def get_progress(file_name: str, default: int = 0) -> int:
         return default
 
 
-@on_exception()  # type: ignore[misc]
+@on_exception(logger=LOGGER)  # type: ignore[misc]
 def set_progress(
     video_path: str, current_frame: int, frame_count: Optional[int] = None
 ) -> None:
@@ -190,7 +206,7 @@ def set_progress(
         dump(log_data, fout, indent=2)
 
 
-@on_exception()  # type: ignore[misc]
+@on_exception(logger=LOGGER)  # type: ignore[misc]
 def display_image(
     image_path: str = FRAME_PATH, display_time: Union[int, float] = FRAME_DELAY
 ) -> None:
@@ -202,12 +218,12 @@ def display_image(
          image for
     """
 
-    format_image(image_path)
+    output_path = format_image(image_path)
 
     LOGGER.info("Displaying `%s` for %s seconds", image_path, display_time)
 
     # Open JPG in PIL and dither the image into a 1 bit bitmap
-    pil_im = Image.open(FRAME_PATH).convert(mode="1", dither=Dither.FLOYDSTEINBERG)
+    pil_im = Image.open(output_path).convert(mode="1", dither=Dither.FLOYDSTEINBERG)
 
     # display the image
     DISPLAY.display(DISPLAY.getbuffer(pil_im))
@@ -215,7 +231,7 @@ def display_image(
     sleep(display_time)
 
 
-@on_exception()  # type: ignore[misc]
+@on_exception(logger=LOGGER)  # type: ignore[misc]
 def play_video(video_path: str) -> None:
     """Play a video file on the E-Paper display
 
@@ -262,12 +278,12 @@ def play_video(video_path: str) -> None:
 
         # Use ffmpeg to extract a frame from the movie, crop it,
         # letterbox it and output it as a JPG
-        extract_frame(video_path, frame)
+        output_path = extract_frame(video_path, frame)
 
-        display_image(EXTRACT_PATH)
+        display_image(output_path)
 
 
-@on_exception()  # type: ignore[misc]
+@on_exception(logger=LOGGER)  # type: ignore[misc]
 def choose_next_video() -> Optional[str]:
     """Pick which video to play next. Either find one that hasn't yet been
     finished, or one that hasn't even been started
@@ -311,7 +327,7 @@ def choose_next_video() -> Optional[str]:
     return None
 
 
-@on_exception()  # type: ignore[misc]
+@on_exception(logger=LOGGER)  # type: ignore[misc]
 def main() -> None:
     """Loops through all videos in the movie directory and then the VSMP Google
     Photos album
