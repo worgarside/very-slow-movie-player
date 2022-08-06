@@ -3,7 +3,7 @@
 from datetime import datetime
 from json import dump, load
 from logging import DEBUG, getLogger
-from os import listdir
+from os import getenv, listdir
 from os.path import abspath, dirname, exists, join
 from pathlib import Path
 from random import shuffle
@@ -258,6 +258,10 @@ def play_video(video_path: str) -> None:
     )
 
     LOGGER.info("There are %d frames in this video", frame_count)
+
+    if getenv("ALWAYS_RESTART_VIDEOS", "true").lower() == "true":
+        LOGGER.debug("Resetting progress log for `%s`", video_path)
+        set_progress(video_path, 0, frame_count)
 
     current_frame = get_progress(video_path, 2000 if frame_count >= 10000 else 0)
 
