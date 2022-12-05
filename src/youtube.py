@@ -1,8 +1,10 @@
 """Downloads videos from a YouTube playlist for playing on the VSMP"""
+from __future__ import annotations
+
 from os import getenv, listdir
 from os.path import join
 from pathlib import Path
-from typing import Dict, List, Literal
+from typing import Literal
 
 from dotenv import load_dotenv
 from pydantic import BaseModel
@@ -48,7 +50,7 @@ class YouTubeVideoInfo(BaseModel):
     channelId: str
     title: str
     description: str
-    thumbnails: Dict[str, YouTubeVideoThumbnailInfo]
+    thumbnails: dict[str, YouTubeVideoThumbnailInfo]
     channelTitle: str
     playlistId: str
     position: int
@@ -76,7 +78,7 @@ class YouTubeVideoInfo(BaseModel):
 
 
 @on_exception()  # type: ignore[misc]
-def get_playlist_content(playlist_id: str) -> List[YouTubeVideoInfo]:
+def get_playlist_content(playlist_id: str) -> list[YouTubeVideoInfo]:
     """Get the content of a public playlist on YouTube
 
     Args:
