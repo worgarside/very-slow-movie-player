@@ -1,5 +1,7 @@
 """Currently just displays photos from an album on Google Photos, but used to display
  videos too"""
+from __future__ import annotations
+
 from datetime import datetime
 from json import dump, load
 from logging import DEBUG, getLogger
@@ -9,7 +11,7 @@ from pathlib import Path
 from random import shuffle
 from tempfile import gettempdir
 from time import sleep
-from typing import Dict, Optional, TypedDict, Union
+from typing import TypedDict
 
 from dotenv import load_dotenv
 from PIL import Image
@@ -169,7 +171,7 @@ def get_progress(file_name: str, default: int = 0) -> int:
         int: the number of the frame that was played most recently
     """
     with open(PROGRESS_LOG, encoding="UTF-8") as fin:
-        log_data: Dict[str, ProgressInfo] = load(fin)
+        log_data: dict[str, ProgressInfo] = load(fin)
 
     LOGGER.info("Getting progress for `%s`", file_name)
 
@@ -181,7 +183,7 @@ def get_progress(file_name: str, default: int = 0) -> int:
 
 @on_exception(logger=LOGGER)  # type: ignore[misc]
 def set_progress(
-    video_path: str, current_frame: int, frame_count: Optional[int] = None
+    video_path: str, current_frame: int, frame_count: int | None = None
 ) -> None:
     """Update the JSON log file, so we can resume if the program is exited
 
@@ -208,7 +210,7 @@ def set_progress(
 
 @on_exception(logger=LOGGER)  # type: ignore[misc]
 def display_image(
-    image_path: str = FRAME_PATH, display_time: Union[int, float] = FRAME_DELAY
+    image_path: str = FRAME_PATH, display_time: int | float = FRAME_DELAY
 ) -> None:
     """Display an image on the EPD
 
@@ -288,7 +290,7 @@ def play_video(video_path: str) -> None:
 
 
 @on_exception(logger=LOGGER)  # type: ignore[misc]
-def choose_next_video() -> Optional[str]:
+def choose_next_video() -> str | None:
     """Pick which video to play next. Either find one that hasn't yet been
     finished, or one that hasn't even been started
 
@@ -297,7 +299,7 @@ def choose_next_video() -> Optional[str]:
     """
 
     with open(PROGRESS_LOG, encoding="UTF-8") as fin:
-        log_data: Dict[str, ProgressInfo] = load(fin)
+        log_data: dict[str, ProgressInfo] = load(fin)
 
     LOGGER.info("There are %i videos in the log", len(log_data))
 
