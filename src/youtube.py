@@ -9,7 +9,7 @@ from typing import Literal
 from dotenv import load_dotenv
 from pydantic import BaseModel
 from requests import get
-from wg_utilities.exceptions import on_exception  # pylint: disable=no-name-in-module
+from wg_utilities.exceptions import on_exception
 from youtube_dl import YoutubeDL
 
 load_dotenv()
@@ -40,23 +40,23 @@ class YouTubeVideoResourceIdInfo(BaseModel):
     """Model specifically for the resourceId object"""
 
     kind: Literal["youtube#video"]
-    videoId: str
+    videoId: str  # noqa: N815
 
 
 class YouTubeVideoInfo(BaseModel):
     """Pydantic model for the YouTube API response"""
 
-    publishedAt: str
-    channelId: str
+    publishedAt: str  # noqa: N815
+    channelId: str  # noqa: N815
     title: str
     description: str
     thumbnails: dict[str, YouTubeVideoThumbnailInfo]
-    channelTitle: str
-    playlistId: str
+    channelTitle: str  # noqa: N815
+    playlistId: str  # noqa: N815
     position: int
-    resourceId: YouTubeVideoResourceIdInfo
-    videoOwnerChannelTitle: str
-    videoOwnerChannelId: str
+    resourceId: YouTubeVideoResourceIdInfo  # noqa: N815
+    videoOwnerChannelTitle: str  # noqa: N815
+    videoOwnerChannelId: str  # noqa: N815
 
     @property
     def sanitized_title(self) -> str:

@@ -15,21 +15,23 @@ from typing import TypedDict
 
 from dotenv import load_dotenv
 from PIL import Image
-from PIL.Image import Dither, Resampling  # type: ignore[attr-defined]
+from PIL.Image import Dither, Resampling
 from wg_utilities.clients import GooglePhotosClient
 from wg_utilities.clients.google_photos import MediaType
-from wg_utilities.devices.epd import (  # pylint: disable=no-name-in-module
+from wg_utilities.devices.epd import (
     EPD,
     EPD_HEIGHT,
     EPD_WIDTH,
     FRAME_DELAY,
     implementation,
 )
-from wg_utilities.exceptions import on_exception  # pylint: disable=no-name-in-module
+from wg_utilities.exceptions import on_exception
 from wg_utilities.loggers import add_file_handler, add_stream_handler
 
-from ffmpeg import input as ffmpeg_input  # pylint: disable=no-name-in-module
-from ffmpeg import probe  # pylint: disable=no-name-in-module
+# pylint: disable=no-name-in-module
+# pylint: disable=no-name-in-module
+from ffmpeg import input as ffmpeg_input  # type: ignore[attr-defined]
+from ffmpeg import probe  # type: ignore[attr-defined]
 
 load_dotenv()
 
@@ -242,7 +244,7 @@ def play_video(video_path: str) -> None:
 
     Raises:
         FileNotFoundError: if the video path doesn't exist
-        Exception: if the video file is un-usable for some reason
+        RuntimeError: if the video file is un-usable for some reason
     """
 
     LOGGER.info("Input video is `%s`", video_path)
@@ -253,7 +255,7 @@ def play_video(video_path: str) -> None:
     # Check how many frames are in the movie
     probe_streams = probe(video_path).get("streams")
     if not probe_streams:
-        raise Exception("No streams found in ffmpeg probe")
+        raise RuntimeError("No streams found in ffmpeg probe")
 
     frame_count = int(
         probe_streams[0].get("nb_frames") or 24 * float(probe_streams[0]["duration"])
@@ -347,16 +349,16 @@ def main() -> None:
     # Initialise and clear the screen
     DISPLAY.init()
     DISPLAY.clear()
-
-    # while next_video := choose_next_video():
-    #     try:
-    #         play_video(next_video)
-    #     except Exception as exc:  # pylint: disable=broad-except
-    #         # raise
-    #         LOGGER.exception(
-    #             "Unable to play video: `%s - %s`", type(exc).__name__, exc.__str__()
-    #         )
-
+    _ = """
+     while next_video := choose_next_video():
+         try:
+             play_video(next_video)
+         except Exception as exc:
+             # raise
+             LOGGER.exception(
+                 "Unable to play video: `%s - %s`", type(exc).__name__, exc.__str__()
+             )
+    """
     media_items = GOOGLE.get_album_from_name("Very Slow Movie Player").media_items
     shuffle(media_items)
     for item in media_items:
