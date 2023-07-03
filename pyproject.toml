@@ -1,3 +1,31 @@
+[tool.poetry]
+name = "very-slow-movie-player"
+version = "0.1.0"
+description = ""
+authors = ["Will Garside <worgarside@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+"rpi.gpio" = { platform = "linux", version = "*" }
+pillow = "*"
+spidev = { platform = "linux", version = "*" }
+ffmpeg-python = "*"
+youtube-dl = "*"
+python-dotenv = "*"
+requests = "*"
+google-auth-oauthlib = "*"
+boto3 = "*"
+python-dateutil = { platform = "linux", version = "*" }
+wg-utilities = { extras = ["clients", "epd", "exceptions"], version = "*" }
+pydantic = "*"
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "*"
+black = "==22.10.0"
+pylint = "*"
+
 [tool.black]
 include = '\.pyi?$'
 exclude = '''
@@ -52,8 +80,8 @@ no_gitignore = false
 line-length = 120
 select = [
   # https://github.com/charliermarsh/ruff#supported-rules
-  "B",  # Flake8 bugbear
-  "C4", # Flake8 comprehensions
+  "B",   # Flake8 bugbear
+  "C4",  # Flake8 comprehensions
   "E",   # Pycodestyle errors
   "ERA", # Eradicate commented out code
   "F",   # Pyflakes
