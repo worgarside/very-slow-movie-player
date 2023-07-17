@@ -23,7 +23,7 @@ pydantic = "*"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "*"
-black = "==23.3.0"
+black = "==23.7.0"
 pylint = "*"
 
 [tool.black]
