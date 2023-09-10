@@ -6,7 +6,7 @@ Type=simple
 Restart=always
 RestartSec=1
 User=pi
-ExecStart=/home/pi/.local/share/virtualenvs/very-slow-movie-player-xHT2FFWc/bin/python /home/pi/very-slow-movie-player/src/main.py
+ExecStart=/home/pi/very-slow-movie-player/.venv/bin/python /home/pi/very-slow-movie-player/src/main.py
 
 [Install]
 WantedBy=multi-user.target
