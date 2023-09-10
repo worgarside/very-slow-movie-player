@@ -16,7 +16,6 @@ youtube-dl = "*"
 python-dotenv = "*"
 requests = "*"
 google-auth-oauthlib = "*"
-boto3 = "*"
 python-dateutil = { platform = "linux", version = "*" }
 wg-utilities = { extras = ["clients", "epd", "exceptions"], version = "*" }
 pydantic = "*"
@@ -75,28 +74,49 @@ all = true
 no_gitignore = false
 
 [tool.ruff]
-# Longer line length to avoid throwing errors in case where black doesn't
-# wraps the lines (e.g. a long URL).
-line-length = 120
+line-length = 100
 select = [
-  # https://github.com/charliermarsh/ruff#supported-rules
-  "B",   # Flake8 bugbear
-  "C4",  # Flake8 comprehensions
-  "E",   # Pycodestyle errors
-  "ERA", # Eradicate commented out code
-  "F",   # Pyflakes
-  "N",   # PEP8 Naming
-  "RUF", # Ruff-specific rules
-  "UP",  # PyUpgrade
-  "W",   # Pycodestyle warnings
+  # https://github.com/astral-sh/ruff#supported-rules
+  "A",   # https://beta.ruff.rs/docs/rules/#flake8-builtins-a
+  "ARG", # https://beta.ruff.rs/docs/rules/#flake8-unused-arguments-arg
+  "B",   # https://beta.ruff.rs/docs/rules/#flake8-bugbear-b
+  "C4",  # https://beta.ruff.rs/docs/rules/#flake8-comprehensions-c4
+  "COM", # https://beta.ruff.rs/docs/rules/#flake8-commas-com
+  "D",   # https://beta.ruff.rs/docs/rules/#pydocstyle-d
+  "E",   # https://beta.ruff.rs/docs/rules/#error-e
+  "ERA", # https://beta.ruff.rs/docs/rules/#eradicate-era
+  "F",   # https://beta.ruff.rs/docs/rules/#pyflakes-f
+  "FA",  # https://beta.ruff.rs/docs/rules/#flake8-future-annotations-fa
+  "FBT", # https://beta.ruff.rs/docs/rules/#flake8-boolean-trap-fbt
+  "G",   # https://beta.ruff.rs/docs/rules/#flake8-logging-format-g
+  "I",   # https://beta.ruff.rs/docs/rules/#isort-i
+  "ICN", # https://beta.ruff.rs/docs/rules/#flake8-import-conventions-icn
+  "N",   # https://beta.ruff.rs/docs/rules/#pep8-naming-n
+  "PGH", # https://beta.ruff.rs/docs/rules/#pygrep-hooks-pgh
+  "PIE", # https://beta.ruff.rs/docs/rules/#flake8-pie-pie
+  "PL",  # https://beta.ruff.rs/docs/rules/#pylint-pl
+  "PT",  # https://beta.ruff.rs/docs/rules/#flake8-pytest-style-pt
+  "PTH", # https://beta.ruff.rs/docs/rules/#flake8-use-pathlib-pth
+  "Q",   # https://beta.ruff.rs/docs/rules/#flake8-quotes-q
+  "RET", # https://beta.ruff.rs/docs/rules/#flake8-return-ret
+  "RSE", # https://beta.ruff.rs/docs/rules/#flake8-raise-rse
+  "RUF", # https://beta.ruff.rs/docs/rules/#ruff-specific-rules-ruf
+  "S",   # https://beta.ruff.rs/docs/rules/#flake8-bandit-s
+  "SIM", # https://beta.ruff.rs/docs/rules/#flake8-simplify-sim
+  "UP",  # https://beta.ruff.rs/docs/rules/#pyupgrade-up
+  "W",   # https://beta.ruff.rs/docs/rules/#warning-w
 ]
 ignore = [
-  "D107",  # public-init
-  "D202",  # no-blank-line-after-function
-  "D203",  # one-blank-line-before-class
-  "D213",  # multi-line-summary-second-line
-  "D400",  # first-line-end-with-period
-  "D406",  # new-line-after-section-name
-  "D407",  # dashed-underline-after-section
-  "UP037", # quoted-annotation
+  "COM812", # https://beta.ruff.rs/docs/rules/missing-trailing-comma/
+  "D202",   # no-blank-line-after-function
+  "UP037",  # quoted-annotation
 ]
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["D104"]
+
+[tool.ruff.pydocstyle]
+convention = "google"
+
+[tool.ruff.pylint]
+max-args=10

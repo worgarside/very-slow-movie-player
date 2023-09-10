@@ -1,8 +1,7 @@
-"""Downloads videos from a YouTube playlist for playing on the VSMP"""
+"""Downloads videos from a YouTube playlist for playing on the VSMP."""
 from __future__ import annotations
 
-from os import getenv, listdir
-from os.path import join
+from os import getenv
 from pathlib import Path
 from typing import Literal
 
@@ -18,7 +17,7 @@ BASE_URL = "https://www.googleapis.com/youtube/v3/"
 API_KEY = getenv("YT_API_KEY")
 PLAYLIST_ID = getenv("YT_PLAYLIST_ID")
 
-OUTPUT_DIR = f"{Path.home()}/movies"
+OUTPUT_DIR = Path.home() / "movies"
 YDL_OPTS = {
     "format": "bestvideo[height<=480]/best[height<=480]",
     "outtmpl": f"{OUTPUT_DIR}/%(title)s.%(ext)s",
@@ -28,7 +27,7 @@ YDL_OPTS = {
 
 # pylint: disable=too-few-public-methods
 class YouTubeVideoThumbnailInfo(BaseModel):
-    """Model specifically for the thumbnail object"""
+    """Model specifically for the thumbnail object."""
 
     url: str
     width: int
@@ -37,14 +36,14 @@ class YouTubeVideoThumbnailInfo(BaseModel):
 
 # pylint: disable=too-few-public-methods
 class YouTubeVideoResourceIdInfo(BaseModel):
-    """Model specifically for the resourceId object"""
+    """Model specifically for the resourceId object."""
 
     kind: Literal["youtube#video"]
     videoId: str  # noqa: N815
 
 
 class YouTubeVideoInfo(BaseModel):
-    """Pydantic model for the YouTube API response"""
+    """Pydantic model for the YouTube API response."""
 
     publishedAt: str  # noqa: N815
     channelId: str  # noqa: N815
@@ -60,9 +59,10 @@ class YouTubeVideoInfo(BaseModel):
 
     @property
     def sanitized_title(self) -> str:
-        """
+        """Get a version of the title suitable for use as a file name.
+
         Returns:
-            str: the video title, with no characters that will break file names
+            str: the video title, with no characters that will break file names.
         """
         return (
             self.title.replace("<", "_")
@@ -77,9 +77,9 @@ class YouTubeVideoInfo(BaseModel):
         )
 
 
-@on_exception()  # type: ignore[misc]
+@on_exception()
 def get_playlist_content(playlist_id: str) -> list[YouTubeVideoInfo]:
-    """Get the content of a public playlist on YouTube
+    """Get the content of a public playlist on YouTube.
 
     Args:
         playlist_id (str): the ID of the playlist to query
@@ -95,12 +95,14 @@ def get_playlist_content(playlist_id: str) -> list[YouTubeVideoInfo]:
             "maxResults": 50,
             "part": "snippet",
         },
+        timeout=10,
     )
 
     res.raise_for_status()
 
     playlist_items = [
-        YouTubeVideoInfo.parse_obj(v["snippet"]) for v in res.json().get("items", [])
+        YouTubeVideoInfo.model_validate(v["snippet"])
+        for v in res.json().get("items", [])
     ]
 
     while token := res.json().get("nextPageToken"):
@@ -113,6 +115,7 @@ def get_playlist_content(playlist_id: str) -> list[YouTubeVideoInfo]:
                 "part": "snippet",
                 "pageToken": token,
             },
+            timeout=10,
         )
 
         playlist_items.extend(
@@ -125,15 +128,15 @@ def get_playlist_content(playlist_id: str) -> list[YouTubeVideoInfo]:
     return playlist_items
 
 
-@on_exception()  # type: ignore[misc]
+@on_exception()
 def main() -> None:
-    """Iterates through the playlist and downloads each video"""
+    """Iterate through the playlist and download each video."""
 
     if PLAYLIST_ID is None:
         raise ValueError("Env var `YT_PLAYLIST_ID` not set")
 
     for video in get_playlist_content(PLAYLIST_ID):
-        if join(OUTPUT_DIR, video.sanitized_title + ".mp4") in listdir(OUTPUT_DIR):
+        if (OUTPUT_DIR / (video.sanitized_title + ".mp4")).is_file():
             continue
 
         with YoutubeDL(YDL_OPTS) as ydl:
