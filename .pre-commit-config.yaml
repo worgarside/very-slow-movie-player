@@ -89,17 +89,9 @@ repos:
           - --strict
           - --show-error-codes
         additional_dependencies:
-          - types-requests
-          - types-paramiko
-          - boto3-stubs
-          - lxml-stubs
-          - types-flask
-          - types-Pillow
-          - types-setuptools
-          - types-tzlocal
           - pydantic
-          - types-PyYAML
-          - types-python-dateutil
+          - types-requests
+          - wg-utilities
 
   - repo: local
     hooks:

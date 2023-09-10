@@ -1,12 +1,10 @@
-"""Currently just displays photos from an album on Google Photos, but used to display
- videos too"""
+"""Currently just displays photos from an album on Google Photos."""
 from __future__ import annotations
 
 from datetime import datetime
-from json import dump, load
+from json import dumps, loads
 from logging import DEBUG, getLogger
-from os import getenv, listdir
-from os.path import abspath, dirname, exists, join
+from os import getenv
 from pathlib import Path
 from random import shuffle
 from tempfile import gettempdir
@@ -40,48 +38,48 @@ LOGGER.setLevel(DEBUG)
 
 add_file_handler(
     LOGGER,
-    logfile_path=join(
-        Path.home(),
-        "logs",
-        "very-slow-movie-player",
-        f"{datetime.today().strftime('%Y-%m-%d')}.log",
-    ),
+    logfile_path=Path.home()
+    / "logs"
+    / "very-slow-movie-player"
+    / datetime.today().strftime("%Y-%m-%d.log"),
 )
 add_stream_handler(LOGGER)
 
-LOGGER.debug("Temp directory is `%s`", gettempdir())
+TMP_DIR = Path(gettempdir())
+
+LOGGER.debug("Temp directory is `%s`", TMP_DIR.as_posix())
 
 DISPLAY = EPD()
 GOOGLE = GooglePhotosClient(
-    "very-slow-movie-player",
-    [
+    client_id=getenv("GOOGLE_CLIENT_ID"),
+    client_secret=getenv("GOOGLE_CLIENT_SECRET"),
+    headless_auth_link_callback=print,
+    scopes=[
         "https://www.googleapis.com/auth/photoslibrary",
         "https://www.googleapis.com/auth/photoslibrary.sharing",
     ],
-    join(abspath(dirname(__file__)), "client_id.json"),
 )
 
-MOVIE_DIRECTORY = join(Path.home(), "movies")
-EXTRACT_PATH = join(gettempdir(), "vsmp_extract.jpg")
-FRAME_PATH = join(gettempdir(), "vsmp_frame.jpg")
-PROGRESS_LOG = join(abspath(dirname(__file__)), "progress_log.json")
+MOVIE_DIRECTORY = Path.home() / "movies"
+EXTRACT_PATH = TMP_DIR / "vsmp_extract.jpg"
+FRAME_PATH = TMP_DIR / "vsmp_frame.jpg"
+PROGRESS_LOG = Path(__file__).parent / "progress_log.json"
 
 INCREMENT = 12
 
 
 class ProgressInfo(TypedDict):
-    """Model for the progress info objects in the log"""
+    """Model for the progress info objects in the log."""
 
     current: int
     total: int
 
 
-@on_exception(logger=LOGGER)  # type: ignore[misc]
+@on_exception(logger=LOGGER)
 def extract_frame(
-    video_path: str, frame: int, *, extract_output_path: str = EXTRACT_PATH
-) -> str:
-    """Output a frame from the video file to a JPG image to be displayed on
-    the E-Paper display
+    video_path: Path, frame: int, *, extract_output_path: Path = EXTRACT_PATH
+) -> Path:
+    """Output a frame from the video file to a JPG image.
 
     Steps:
       - ffmpeg_input: takes a filepath as input and opens the video
@@ -101,9 +99,9 @@ def extract_frame(
         .filter("pad", EPD_WIDTH, EPD_HEIGHT, -1, -1)
 
     Args:
-        video_path (str): the name of the file to extract the frame from
+        video_path (Path): the name of the file to extract the frame from
         frame (int): the number of the frame to extract
-        extract_output_path (str): the path at which to place the extracted image file
+        extract_output_path (Path): the path at which to place the extracted image file
 
     Returns:
         str: the output path, again provided for ease of use
@@ -121,13 +119,13 @@ def extract_frame(
     return extract_output_path
 
 
-@on_exception(logger=LOGGER)  # type: ignore[misc]
-def format_image(image_path: str, frame_output_path: str = FRAME_PATH) -> str:
-    """Formats an image for displaying on the EPD
+@on_exception(logger=LOGGER)
+def format_image(image_path: Path, frame_output_path: Path = FRAME_PATH) -> Path:
+    """Formats an image for displaying on the EPD.
 
     Args:
-        image_path (str): the name of the file to format
-        frame_output_path (str): the path at which to place the frame image file
+        image_path (Path): the name of the file to format
+        frame_output_path (Path): the path at which to place the frame image file
 
     Returns:
         str: the output path - the user will know this anyway, but it's done for ease
@@ -160,10 +158,11 @@ def format_image(image_path: str, frame_output_path: str = FRAME_PATH) -> str:
     return frame_output_path
 
 
-@on_exception(logger=LOGGER)  # type: ignore[misc]
+@on_exception(logger=LOGGER)
 def get_progress(file_name: str, default: int = 0) -> int:
-    """Get the number of the most recently played frame from the JSON log file,
-     so we can resume in the case of an early exit
+    """Get the number of the most recently played frame from the JSON log file.
+
+    This is so we can resume in the case of an early exit.
 
     Args:
         file_name (str): the name of the file being played
@@ -172,8 +171,7 @@ def get_progress(file_name: str, default: int = 0) -> int:
     Returns:
         int: the number of the frame that was played most recently
     """
-    with open(PROGRESS_LOG, encoding="UTF-8") as fin:
-        log_data: dict[str, ProgressInfo] = load(fin)
+    log_data: dict[str, ProgressInfo] = loads(PROGRESS_LOG.read_text())
 
     LOGGER.info("Getting progress for `%s`", file_name)
 
@@ -183,19 +181,18 @@ def get_progress(file_name: str, default: int = 0) -> int:
         return default
 
 
-@on_exception(logger=LOGGER)  # type: ignore[misc]
+@on_exception(logger=LOGGER)
 def set_progress(
     video_path: str, current_frame: int, frame_count: int | None = None
 ) -> None:
-    """Update the JSON log file, so we can resume if the program is exited
+    """Update the JSON log file, so we can resume if the program is exited.
 
     Args:
         video_path (str): the path to the file being played
         current_frame (int): which frame has been played most recently
         frame_count (int): the total number of frames in the video
     """
-    with open(PROGRESS_LOG, encoding="UTF-8") as fin:
-        log_data = load(fin)
+    log_data = loads(PROGRESS_LOG.read_text())
 
     progress = {video_path: {"current": current_frame}}
 
@@ -206,18 +203,17 @@ def set_progress(
 
     log_data.update(progress)
 
-    with open(PROGRESS_LOG, "w", encoding="UTF-8") as fout:
-        dump(log_data, fout, indent=2)
+    PROGRESS_LOG.write_text(dumps(log_data, indent=2, sort_keys=True))
 
 
-@on_exception(logger=LOGGER)  # type: ignore[misc]
+@on_exception(logger=LOGGER)
 def display_image(
-    image_path: str = FRAME_PATH, display_time: int | float = FRAME_DELAY
+    image_path: Path = FRAME_PATH, display_time: int | float = FRAME_DELAY
 ) -> None:
-    """Display an image on the EPD
+    """Display an image on the EPD.
 
     Args:
-        image_path (str): the path to the file to display on the EPD
+        image_path (Path): the path to the file to display on the EPD
         display_time (Union([int, float])): the number of seconds to display the
          image for
     """
@@ -235,9 +231,9 @@ def display_image(
     sleep(display_time)
 
 
-@on_exception(logger=LOGGER)  # type: ignore[misc]
-def play_video(video_path: str) -> None:
-    """Play a video file on the E-Paper display
+@on_exception(logger=LOGGER)
+def play_video(video_path: Path) -> None:
+    """Play a video file on the E-Paper display.
 
     Args:
         video_path (str): the path to the file to play
@@ -247,13 +243,14 @@ def play_video(video_path: str) -> None:
         RuntimeError: if the video file is un-usable for some reason
     """
 
-    LOGGER.info("Input video is `%s`", video_path)
+    LOGGER.info("Input video is `%s`", video_path.as_posix())
 
-    if not exists(video_path):
-        raise FileNotFoundError(f"Unable to find `{video_path}`")
+    if video_path.is_file():
+        raise FileNotFoundError(video_path)
 
     # Check how many frames are in the movie
     probe_streams = probe(video_path).get("streams")
+
     if not probe_streams:
         raise RuntimeError("No streams found in ffmpeg probe")
 
@@ -267,7 +264,9 @@ def play_video(video_path: str) -> None:
         LOGGER.debug("Resetting progress log for `%s`", video_path)
         set_progress(video_path, 0, frame_count)
 
-    current_frame = get_progress(video_path, 2000 if frame_count >= 10000 else 0)
+    current_frame = get_progress(
+        video_path, 2000 if frame_count >= 10000 else 0  # noqa: PLR2004
+    )
 
     hrs, secs = divmod(
         (((frame_count - current_frame) / INCREMENT) * FRAME_DELAY), 3600
@@ -291,42 +290,48 @@ def play_video(video_path: str) -> None:
         display_image(output_path)
 
 
-@on_exception(logger=LOGGER)  # type: ignore[misc]
-def choose_next_video() -> str | None:
-    """Pick which video to play next. Either find one that hasn't yet been
-    finished, or one that hasn't even been started
+@on_exception(logger=LOGGER)
+def choose_next_video() -> Path | None:
+    """Pick which video to play next.
+
+    Either find one that hasn't yet been finished, or one that hasn't even been
+    started.
 
     Returns:
         str: the name of the video file to start playing
     """
 
-    with open(PROGRESS_LOG, encoding="UTF-8") as fin:
-        log_data: dict[str, ProgressInfo] = load(fin)
+    log_data: dict[str, ProgressInfo] = loads(PROGRESS_LOG.read_text())
 
     LOGGER.info("There are %i videos in the log", len(log_data))
 
-    for file_path in log_data:
-        if not exists(file_path):
-            LOGGER.debug("`%s` no longer available", file_path)
+    for log_file_path in log_data:
+        if not Path(log_file_path).is_file():
+            LOGGER.debug("`%s` no longer available", log_file_path)
             continue
 
-        video = log_data[file_path]
+        video = log_data[log_file_path]
 
         if (total := video.get("total", -1)) - (
             current_frame := video.get("current", -1)
         ) > INCREMENT:
             LOGGER.info(
-                "`%s` has only had %i/%i frames played", file_path, current_frame, total
+                "`%s` has only had %i/%i frames played",
+                log_file_path,
+                current_frame,
+                total,
             )
-            return file_path
+            return Path(log_file_path)
 
-    for file_name in listdir(MOVIE_DIRECTORY):
-        file_path = join(MOVIE_DIRECTORY, file_name)
-        if skip_reason := {
-            not file_name.lower().endswith(".mp4"): f"`{file_name}` is not an mp4",
-            file_path in log_data: f"`{file_path}` has already been played",
-        }.get(True):
-            LOGGER.debug("Skipping: %s", skip_reason)
+    for file_name in MOVIE_DIRECTORY.iterdir():
+        file_path = MOVIE_DIRECTORY / file_name
+
+        if not file_name.name.lower().endswith(".mp4"):
+            LOGGER.debug("`%s` is not an mp4", file_name.name)
+            continue
+
+        if file_path.as_posix() in log_data:
+            LOGGER.debug("`%s` has already been played", file_path)
             continue
 
         LOGGER.info("`%s` hasn't been played yet, returning", file_path)
@@ -335,16 +340,16 @@ def choose_next_video() -> str | None:
     return None
 
 
-@on_exception(logger=LOGGER)  # type: ignore[misc]
+@on_exception(logger=LOGGER)
 def main() -> None:
-    """Loops through all videos in the movie directory and then the VSMP Google
-    Photos album
+    """Loop through all videos.
+
+    Loop through the movie directory and then the VSMP Google Photos album.
     """
 
-    if not exists(PROGRESS_LOG):
+    if PROGRESS_LOG.is_file():
         LOGGER.warning("Progress log not found at `%s`", PROGRESS_LOG)
-        with open(PROGRESS_LOG, "w", encoding="UTF-8") as _fout:
-            dump({}, _fout, indent=2)
+        PROGRESS_LOG.write_text("{}")
 
     # Initialise and clear the screen
     DISPLAY.init()
@@ -359,7 +364,7 @@ def main() -> None:
                  "Unable to play video: `%s - %s`", type(exc).__name__, exc.__str__()
              )
     """
-    media_items = GOOGLE.get_album_from_name("Very Slow Movie Player").media_items
+    media_items = GOOGLE.get_album_by_name("Very Slow Movie Player").media_items
     shuffle(media_items)
     for item in media_items:
         item.download(width_override=EPD_WIDTH, height_override=EPD_HEIGHT)
@@ -370,7 +375,7 @@ def main() -> None:
             display_image(item.local_path, 300)
 
     DISPLAY.sleep()
-    implementation.module_exit()
+    implementation.module_exit()  # type: ignore[union-attr]
 
 
 if __name__ == "__main__":
