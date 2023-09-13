@@ -6,6 +6,7 @@ Type=simple
 Restart=always
 RestartSec=1
 User=pi
+EnvironmentFile=/home/pi/very-slow-movie-player/.env
 ExecStart=/home/pi/very-slow-movie-player/.venv/bin/python /home/pi/very-slow-movie-player/src/main.py
 
 [Install]
