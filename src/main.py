@@ -11,7 +11,6 @@ from tempfile import gettempdir
 from time import sleep
 from typing import TypedDict
 
-from dotenv import load_dotenv
 from PIL import Image
 from PIL.Image import Dither, Resampling
 from wg_utilities.clients import GooglePhotosClient
@@ -34,8 +33,6 @@ from wg_utilities.loggers import (
 # pylint: disable=no-name-in-module
 from ffmpeg import input as ffmpeg_input  # type: ignore[attr-defined]
 from ffmpeg import probe  # type: ignore[attr-defined]
-
-load_dotenv()
 
 LOGGER = getLogger(__name__)
 LOGGER.setLevel(DEBUG)
@@ -60,7 +57,7 @@ DISPLAY = EPD()
 GOOGLE = GooglePhotosClient(
     client_id=getenv("GOOGLE_CLIENT_ID"),
     client_secret=getenv("GOOGLE_CLIENT_SECRET"),
-    headless_auth_link_callback=print,
+    headless_auth_link_callback=LOGGER.info,
     scopes=[
         "https://www.googleapis.com/auth/photoslibrary",
         "https://www.googleapis.com/auth/photoslibrary.sharing",
