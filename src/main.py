@@ -49,6 +49,7 @@ add_warehouse_handler(
     LOGGER, level=WARNING, warehouse_port=8002, allow_connection_errors=True
 )
 
+MEDIA_DIR = Path.home() / "media"
 TMP_DIR = Path(gettempdir())
 
 LOGGER.debug("Temp directory is `%s`", TMP_DIR.as_posix())
@@ -371,7 +372,7 @@ def main() -> None:
     media_items = GOOGLE.get_album_by_name("Very Slow Movie Player").media_items
     shuffle(media_items)
     for item in media_items:
-        item.download(width_override=EPD_WIDTH, height_override=EPD_HEIGHT)
+        item.download(MEDIA_DIR, width_override=EPD_WIDTH, height_override=EPD_HEIGHT)
 
         if item.media_type == MediaType.VIDEO:
             play_video(item.local_path)
