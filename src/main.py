@@ -49,7 +49,7 @@ add_warehouse_handler(
     LOGGER, level=WARNING, warehouse_port=8002, allow_connection_errors=True
 )
 
-MEDIA_DIR = Path.home() / "media"
+MEDIA_DIR = Path.home() / "vsmp_media"
 TMP_DIR = Path(gettempdir())
 
 LOGGER.debug("Temp directory is `%s`", TMP_DIR.as_posix())
