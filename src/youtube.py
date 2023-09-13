@@ -25,7 +25,6 @@ YDL_OPTS = {
 }
 
 
-# pylint: disable=too-few-public-methods
 class YouTubeVideoThumbnailInfo(BaseModel):
     """Model specifically for the thumbnail object."""
 
@@ -34,7 +33,6 @@ class YouTubeVideoThumbnailInfo(BaseModel):
     height: int
 
 
-# pylint: disable=too-few-public-methods
 class YouTubeVideoResourceIdInfo(BaseModel):
     """Model specifically for the resourceId object."""
 
