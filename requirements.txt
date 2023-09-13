@@ -403,7 +403,7 @@ urllib3==1.26.16 ; python_version >= "3.11" and python_version < "4.0" \
 werkzeug==2.3.7 ; python_version >= "3.11" and python_version < "4.0" \
     --hash=sha256:2b8c0e447b4b9dbcc85dd97b6eeb4dcbaf6c8b6c3be0bd654e25553e0a2157d8 \
     --hash=sha256:effc12dba7f3bd72e605ce49807bbe692bd729c3bb122a3b91747a6ae77df528
-wg-utilities[clients,epd,exceptions]==4.1.1 ; python_version >= "3.11" and python_version < "4.0" \
+wg-utilities[clients,devices-epd,exceptions]==4.1.1 ; python_version >= "3.11" and python_version < "4.0" \
     --hash=sha256:75079b45d5915daf821b60c2cc210a1849ee269af8497669ab4b1ecfcdd346f9 \
     --hash=sha256:eeee985cde44f3f1829d6f95280882f824a2771bd65d8e9cf243edc56d91c057
 youtube-dl==2021.12.17 ; python_version >= "3.11" and python_version < "4.0" \
