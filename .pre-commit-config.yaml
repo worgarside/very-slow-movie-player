@@ -1,5 +1,10 @@
 ---
 repos:
+  - repo: https://github.com/worgarside/pre-commit-hooks-dependency-sync
+    rev: 1.0.0
+    hooks:
+      - id: sync-additional-dependencies
+
   - repo: https://github.com/python-poetry/poetry
     rev: 1.6.0
     hooks:
@@ -14,7 +19,7 @@ repos:
           - requirements.txt
 
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.13.0
+    rev: v3.14.0
     hooks:
       - id: pyupgrade
         args:
@@ -101,9 +106,9 @@ repos:
           - --strict
           - --show-error-codes
         additional_dependencies:
-          - pydantic
+          - pydantic==2.3.0
           - types-requests
-          - wg-utilities
+          - wg-utilities==4.1.2
 
   - repo: local
     hooks:
@@ -119,6 +124,7 @@ repos:
         types:
           - python
         additional_dependencies:
+          - pylint==2.17.7
           - pylint-strict-informational
 
   - repo: https://github.com/pre-commit/pygrep-hooks
@@ -129,7 +135,7 @@ repos:
       - id: python-check-mock-methods
 
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.2.5
+    rev: v2.2.6
     hooks:
       - id: codespell
         additional_dependencies:
@@ -139,6 +145,6 @@ repos:
           - '*.svg,*.json'
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.0.291
+    rev: v0.0.292
     hooks:
       - id: ruff
