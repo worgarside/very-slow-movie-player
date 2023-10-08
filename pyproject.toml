@@ -23,7 +23,7 @@ pydantic = "*"
 [tool.poetry.group.dev.dependencies]
 pre-commit = "*"
 black = "==23.9.1"
-pylint = "*"
+pylint = "<3.0.0"
 
 [tool.black]
 include = '\.pyi?$'
