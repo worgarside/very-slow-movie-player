@@ -106,7 +106,7 @@ repos:
           - --strict
           - --show-error-codes
         additional_dependencies:
-          - pydantic==2.3.0
+          - pydantic==2.4.2
           - types-requests
           - wg-utilities==4.1.2
 
