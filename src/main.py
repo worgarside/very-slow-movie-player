@@ -15,6 +15,7 @@ from PIL import Image
 from PIL.Image import Dither, Resampling
 from wg_utilities.clients import GooglePhotosClient
 from wg_utilities.clients.google_photos import MediaType
+from wg_utilities.decorators import process_exception
 from wg_utilities.devices.epd import (
     EPD,
     EPD_HEIGHT,
@@ -22,7 +23,6 @@ from wg_utilities.devices.epd import (
     FRAME_DELAY,
     implementation,
 )
-from wg_utilities.exceptions import on_exception
 from wg_utilities.loggers import (
     add_file_handler,
     add_stream_handler,
@@ -45,9 +45,7 @@ add_file_handler(
     / datetime.today().strftime("%Y-%m-%d.log"),
 )
 add_stream_handler(LOGGER)
-add_warehouse_handler(
-    LOGGER, level=WARNING, warehouse_port=8002, allow_connection_errors=True
-)
+add_warehouse_handler(LOGGER, level=WARNING)
 
 MEDIA_DIR = Path.home() / "vsmp_media"
 TMP_DIR = Path(gettempdir())
@@ -80,7 +78,7 @@ class ProgressInfo(TypedDict):
     total: int
 
 
-@on_exception(lambda exc: LOGGER.exception("Error extracrting frame: %r", exc))
+@process_exception(logger=LOGGER)
 def extract_frame(
     video_path: Path, frame: int, *, extract_output_path: Path = EXTRACT_PATH
 ) -> Path:
@@ -124,7 +122,7 @@ def extract_frame(
     return extract_output_path
 
 
-@on_exception(lambda exc: LOGGER.exception("Error formatting image: %r", exc))
+@process_exception(logger=LOGGER)
 def format_image(image_path: Path, frame_output_path: Path = FRAME_PATH) -> Path:
     """Formats an image for displaying on the EPD.
 
@@ -163,7 +161,7 @@ def format_image(image_path: Path, frame_output_path: Path = FRAME_PATH) -> Path
     return frame_output_path
 
 
-@on_exception(lambda exc: LOGGER.exception("Error getting progress: %r", exc))
+@process_exception(logger=LOGGER)
 def get_progress(file_name: str, default: int = 0) -> int:
     """Get the number of the most recently played frame from the JSON log file.
 
@@ -186,7 +184,7 @@ def get_progress(file_name: str, default: int = 0) -> int:
         return default
 
 
-@on_exception(lambda exc: LOGGER.exception("Error setting progress: %r", exc))
+@process_exception(logger=LOGGER)
 def set_progress(
     video_path: str, current_frame: int, frame_count: int | None = None
 ) -> None:
@@ -211,7 +209,7 @@ def set_progress(
     PROGRESS_LOG.write_text(dumps(log_data, indent=2, sort_keys=True))
 
 
-@on_exception(lambda exc: LOGGER.exception("Error displaying image: %r", exc))
+@process_exception(logger=LOGGER)
 def display_image(
     image_path: Path = FRAME_PATH, display_time: int | float = FRAME_DELAY
 ) -> None:
@@ -236,7 +234,7 @@ def display_image(
     sleep(display_time)
 
 
-@on_exception(lambda exc: LOGGER.exception("Error playing video: %r", exc))
+@process_exception(logger=LOGGER)
 def play_video(video_path: Path) -> None:
     """Play a video file on the E-Paper display.
 
@@ -295,7 +293,7 @@ def play_video(video_path: Path) -> None:
         display_image(output_path)
 
 
-@on_exception(lambda exc: LOGGER.exception("Error choosing next video: %r", exc))
+@process_exception(logger=LOGGER)
 def choose_next_video() -> Path | None:
     """Pick which video to play next.
 
@@ -345,7 +343,7 @@ def choose_next_video() -> Path | None:
     return None
 
 
-@on_exception(lambda exc: LOGGER.exception("Error in main loop: %r", exc))
+@process_exception(logger=LOGGER)
 def main() -> None:
     """Loop through all videos.
 
