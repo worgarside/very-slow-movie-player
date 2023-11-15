@@ -399,9 +399,9 @@ urllib3==2.0.7 ; python_version >= "3.11" and python_version < "4.0" \
 werkzeug==3.0.1 ; python_version >= "3.11" and python_version < "4.0" \
     --hash=sha256:507e811ecea72b18a404947aded4b3390e1db8f826b494d76550ef45bb3b1dcc \
     --hash=sha256:90a285dc0e42ad56b34e696398b8122ee4c681833fb35b8334a095d82c56da10
-wg-utilities[clients,devices-epd,exceptions]==5.5.0 ; python_version >= "3.11" and python_version < "4.0" \
-    --hash=sha256:ccfab396da4948c06aabb791d0694d8143a777ad5bdb5c1668571b57a9c6baed \
-    --hash=sha256:eb9b6072465df216bc3ae8c450c6ac0d33e5f3251e82c4c90a48c425178a47d6
+wg-utilities[clients,devices-epd,exceptions]==5.6.0 ; python_version >= "3.11" and python_version < "4.0" \
+    --hash=sha256:3089c0edae8a8a70c08bc93a428fb95b4e8d9abc8e31c5d1af01443aec898169 \
+    --hash=sha256:9e236cb1399881d76b3d2c7e060203a340c1d0781552a167149e2da107c915dd
 youtube-dl==2021.12.17 ; python_version >= "3.11" and python_version < "4.0" \
     --hash=sha256:bc59e86c5d15d887ac590454511f08ce2c47698d5a82c27bfe27b5d814bbaed2 \
     --hash=sha256:f1336d5de68647e0364a47b3c0712578e59ec76f02048ff5c50ef1c69d79cd55
