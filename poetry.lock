@@ -1098,13 +1098,13 @@ watchdog = ["watchdog (>=2.3)"]
 
 [[package]]
 name = "wg-utilities"
-version = "5.5.0"
+version = "5.6.0"
 description = "Loads of useful stuff for the things I do :)"
 optional = false
 python-versions = ">=3.11,<4.0"
 files = [
-    {file = "wg_utilities-5.5.0-py3-none-any.whl", hash = "sha256:eb9b6072465df216bc3ae8c450c6ac0d33e5f3251e82c4c90a48c425178a47d6"},
-    {file = "wg_utilities-5.5.0.tar.gz", hash = "sha256:ccfab396da4948c06aabb791d0694d8143a777ad5bdb5c1668571b57a9c6baed"},
+    {file = "wg_utilities-5.6.0-py3-none-any.whl", hash = "sha256:3089c0edae8a8a70c08bc93a428fb95b4e8d9abc8e31c5d1af01443aec898169"},
+    {file = "wg_utilities-5.6.0.tar.gz", hash = "sha256:9e236cb1399881d76b3d2c7e060203a340c1d0781552a167149e2da107c915dd"},
 ]
 
 [package.dependencies]
@@ -1142,4 +1142,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "d81174e8cef81087f9cf9274d1d24e8f3e5732b70654b3ca7ff58e70e0ac68f0"
+content-hash = "78221de027fcc970ac9173c310663c2093dff4b361c094e7919382333da28211"
