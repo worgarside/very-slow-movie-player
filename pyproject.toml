@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "very-slow-movie-player"
-version = "1.0.2"
+version = "1.0.3"
 description = ""
 authors = ["Will Garside <worgarside@gmail.com>"]
 license = "MIT"
