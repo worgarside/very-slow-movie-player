@@ -1,4 +1,5 @@
 """Downloads videos from a YouTube playlist for playing on the VSMP."""
+
 from __future__ import annotations
 
 from os import getenv
