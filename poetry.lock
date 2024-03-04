@@ -1121,13 +1121,13 @@ watchdog = ["watchdog (>=2.3)"]
 
 [[package]]
 name = "wg-utilities"
-version = "5.8.0"
+version = "5.8.3"
 description = "Loads of useful stuff for the things I do :)"
 optional = false
 python-versions = ">=3.11,<4.0"
 files = [
-    {file = "wg_utilities-5.8.0-py3-none-any.whl", hash = "sha256:fa9be9ebd979b162c233d4ca0464f166efc7ef2340c56f1ef386d2f525eb5f6a"},
-    {file = "wg_utilities-5.8.0.tar.gz", hash = "sha256:da533511ca9c53d27586ec980d3e2b26d5284eae5b61b5a8f04970890bbb6e09"},
+    {file = "wg_utilities-5.8.3-py3-none-any.whl", hash = "sha256:feb531af5d66b43fca2696f477ec1bfce4ce75112f8b28555c4771808a4f7eb3"},
+    {file = "wg_utilities-5.8.3.tar.gz", hash = "sha256:0dbf2a80c08d25159e793b347a27199723c580525e0b2d84e1568195e650b71d"},
 ]
 
 [package.dependencies]
@@ -1148,7 +1148,7 @@ devices-dht22 = ["pigpio"]
 devices-epd = ["pillow", "rpi.gpio", "spidev"]
 devices-yamaha-yas-209 = ["async-upnp-client", "pydantic (<3.0.0)", "xmltodict"]
 exceptions = ["python-dotenv", "requests (>=2.26.0)"]
-functions = ["lxml (==5.0.0)", "pytz (>=2022.1)"]
+functions = ["lxml (==5.1.0)", "pytz (>=2022.1)"]
 logging = ["pytz (>=2022.1)", "requests (>=2.26.0)"]
 testing = ["botocore"]
 
@@ -1166,4 +1166,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "96b95bc773bd79fa34080daa31a45c4447ddb1a8c5ebc5f312e27c035d645599"
+content-hash = "c4936dcf24e119e40585c73ae1a33b5cb58637b28c5f92c0a6ea6375ed59a67c"
