@@ -108,7 +108,7 @@ repos:
         additional_dependencies:
           - pydantic==2.6.0
           - types-requests
-          - wg-utilities==5.8.3
+          - wg-utilities==5.14.1
 
   - repo: local
     hooks:
