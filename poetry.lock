@@ -839,17 +839,6 @@ files = [
 cli = ["click (>=5.0)"]
 
 [[package]]
-name = "pytz"
-version = "2023.3.post1"
-description = "World timezone definitions, modern and historical"
-optional = false
-python-versions = "*"
-files = [
-    {file = "pytz-2023.3.post1-py2.py3-none-any.whl", hash = "sha256:ce42d816b81b68506614c11e8937d3aa9e41007ceb50bfdcb0749b921bf646c7"},
-    {file = "pytz-2023.3.post1.tar.gz", hash = "sha256:7b4fddbeb94a1eba4b557da24f19fdf9db575192544270a9101d8509f9f43d7b"},
-]
-
-[[package]]
 name = "pyyaml"
 version = "6.0.1"
 description = "YAML parser and emitter for Python"
@@ -1121,13 +1110,13 @@ watchdog = ["watchdog (>=2.3)"]
 
 [[package]]
 name = "wg-utilities"
-version = "5.8.3"
+version = "5.14.1"
 description = "Loads of useful stuff for the things I do :)"
 optional = false
 python-versions = ">=3.11,<4.0"
 files = [
-    {file = "wg_utilities-5.8.3-py3-none-any.whl", hash = "sha256:feb531af5d66b43fca2696f477ec1bfce4ce75112f8b28555c4771808a4f7eb3"},
-    {file = "wg_utilities-5.8.3.tar.gz", hash = "sha256:0dbf2a80c08d25159e793b347a27199723c580525e0b2d84e1568195e650b71d"},
+    {file = "wg_utilities-5.14.1-py3-none-any.whl", hash = "sha256:7d1fa5628ef564bda9d03653080f670d8c48cd49f12d489a7e3c499233db7a9e"},
+    {file = "wg_utilities-5.14.1.tar.gz", hash = "sha256:7962284148660faba688c68a1276143a7d993ddd09bd082f42321fc96c69e99d"},
 ]
 
 [package.dependencies]
@@ -1135,21 +1124,19 @@ flask = {version = ">=2.0.2", optional = true, markers = "extra == \"clients\""}
 pillow = {version = "*", optional = true, markers = "extra == \"devices-epd\""}
 pydantic = {version = "<3.0.0", optional = true, markers = "extra == \"clients\" or extra == \"devices-yamaha-yas-209\""}
 pyjwt = {version = ">=2.6,<2.9", optional = true, markers = "extra == \"clients\""}
-python-dotenv = {version = "*", optional = true, markers = "extra == \"clients\" or extra == \"exceptions\""}
-pytz = {version = ">=2022.1", optional = true, markers = "extra == \"clients\" or extra == \"logging\" or extra == \"functions\""}
 requests = {version = ">=2.26.0", optional = true, markers = "extra == \"clients\" or extra == \"exceptions\" or extra == \"logging\""}
 "rpi.gpio" = {version = "*", optional = true, markers = "sys_platform == \"linux\" and extra == \"devices-epd\""}
 spidev = {version = "*", optional = true, markers = "sys_platform == \"linux\" and extra == \"devices-epd\""}
 tzlocal = {version = "*", optional = true, markers = "extra == \"clients\""}
 
 [package.extras]
-clients = ["flask (>=2.0.2)", "pydantic (<3.0.0)", "pyjwt (>=2.6,<2.9)", "python-dotenv", "pytz (>=2022.1)", "requests (>=2.26.0)", "tzlocal"]
+clients = ["flask (>=2.0.2)", "pydantic (<3.0.0)", "pyjwt (>=2.6,<2.9)", "requests (>=2.26.0)", "tzlocal"]
 devices-dht22 = ["pigpio"]
 devices-epd = ["pillow", "rpi.gpio", "spidev"]
 devices-yamaha-yas-209 = ["async-upnp-client", "pydantic (<3.0.0)", "xmltodict"]
-exceptions = ["python-dotenv", "requests (>=2.26.0)"]
-functions = ["lxml (==5.1.0)", "pytz (>=2022.1)"]
-logging = ["pytz (>=2022.1)", "requests (>=2.26.0)"]
+exceptions = ["requests (>=2.26.0)"]
+functions = ["lxml (==5.1.0)"]
+logging = ["requests (>=2.26.0)"]
 testing = ["botocore"]
 
 [[package]]
@@ -1166,4 +1153,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "c4936dcf24e119e40585c73ae1a33b5cb58637b28c5f92c0a6ea6375ed59a67c"
+content-hash = "cee658c31c87c1cf3a58405c61f06a95cb1c85c5bdf9f9fafb1ef78be21175d2"

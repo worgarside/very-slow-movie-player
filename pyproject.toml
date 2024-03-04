@@ -17,7 +17,7 @@ python-dotenv = "*"
 requests = "*"
 google-auth-oauthlib = "*"
 python-dateutil = { platform = "linux", version = "*" }
-wg-utilities = {extras = ["clients", "devices-epd", "exceptions"], version = "^5.8.3"}
+wg-utilities = {extras = ["clients", "devices-epd", "exceptions"], version = "^5.14.1"}
 pydantic = "*"
 
 [tool.poetry.group.dev.dependencies]
