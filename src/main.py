@@ -1,4 +1,5 @@
 """Currently just displays photos from an album on Google Photos."""
+
 from __future__ import annotations
 
 from datetime import datetime
