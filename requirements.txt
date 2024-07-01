@@ -389,21 +389,12 @@ tzdata==2023.3 ; python_version >= "3.11" and python_version < "4.0" and platfor
 tzlocal==5.0.1 ; python_version >= "3.11" and python_version < "4.0" \
     --hash=sha256:46eb99ad4bdb71f3f72b7d24f4267753e240944ecfc16f25d2719ba89827a803 \
     --hash=sha256:f3596e180296aaf2dbd97d124fe76ae3a0e3d32b258447de7b939b3fd4be992f
-urllib3==2.0.7 ; python_version >= "3.11" and python_version < "4.0" \
-    --hash=sha256:c97dfde1f7bd43a71c8d2a58e369e9b2bf692d1334ea9f9cae55add7d0dd0f84 \
-    --hash=sha256:fdb6d215c776278489906c2f8916e6e7d4f5a9b602ccbcfdf7f016fc8da0596e
-werkzeug==3.0.3 ; python_version >= "3.11" and python_version < "4.0" \
-    --hash=sha256:097e5bfda9f0aba8da6b8545146def481d06aa7d3266e7448e2cccf67dd8bd18 \
-    --hash=sha256:fc9645dc43e03e4d630d23143a04a7f947a9a3b5727cd535fdfe155a17cc48c8
-wg-utilities[clients,devices-epd,exceptions]==5.14.2 ; python_version >= "3.11" and python_version < "4.0" \
-    --hash=sha256:30804bb0441e5065d49a6cbf10bc18d3beba31de96e5626976a30849b85b5dec \
-    --hash=sha256:740575108a09fb2f36f7240ce6a084329234dc80f520bc17fbfafb38bc0a1f87
 urllib3==2.2.2 ; python_version >= "3.11" and python_version < "4.0" \
     --hash=sha256:a448b2f64d686155468037e1ace9f2d2199776e17f0a46610480d311f73e3472 \
     --hash=sha256:dd505485549a7a552833da5e6063639d0d177c04f23bc3864e41e5dc5f612168
-werkzeug==3.0.1 ; python_version >= "3.11" and python_version < "4.0" \
-    --hash=sha256:507e811ecea72b18a404947aded4b3390e1db8f826b494d76550ef45bb3b1dcc \
-    --hash=sha256:90a285dc0e42ad56b34e696398b8122ee4c681833fb35b8334a095d82c56da10
+werkzeug==3.0.3 ; python_version >= "3.11" and python_version < "4.0" \
+    --hash=sha256:097e5bfda9f0aba8da6b8545146def481d06aa7d3266e7448e2cccf67dd8bd18 \
+    --hash=sha256:fc9645dc43e03e4d630d23143a04a7f947a9a3b5727cd535fdfe155a17cc48c8
 wg-utilities[clients,devices-epd,exceptions]==5.15.3 ; python_version >= "3.11" and python_version < "4.0" \
     --hash=sha256:290c32285a14f0d29e409810a0373ade69f3b1f15b598b5552f86a4e43daa300 \
     --hash=sha256:f501484ece5e3da6705cb749bbe89c58e7583352c804da7425588c88c267eb82
