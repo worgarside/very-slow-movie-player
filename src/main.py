@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 from json import dumps, loads
 from logging import DEBUG, WARNING, getLogger
 from os import getenv
@@ -43,7 +43,7 @@ add_file_handler(
     logfile_path=Path.home()
     / "logs"
     / "very-slow-movie-player"
-    / datetime.today().strftime("%Y-%m-%d.log"),
+    / datetime.now(UTC).strftime("%Y-%m-%d.log"),
 )
 add_stream_handler(LOGGER)
 add_warehouse_handler(LOGGER, level=WARNING)
@@ -81,7 +81,10 @@ class ProgressInfo(TypedDict):
 
 @process_exception(logger=LOGGER)
 def extract_frame(
-    video_path: Path, frame: int, *, extract_output_path: Path = EXTRACT_PATH
+    video_path: Path,
+    frame: int,
+    *,
+    extract_output_path: Path = EXTRACT_PATH,
 ) -> Path:
     """Output a frame from the video file to a JPG image.
 
@@ -110,7 +113,6 @@ def extract_frame(
     Returns:
         str: the output path, again provided for ease of use
     """
-
     LOGGER.info("Extracting frame #%i from `%s`", frame, video_path)
 
     (
@@ -135,9 +137,10 @@ def format_image(image_path: Path, frame_output_path: Path = FRAME_PATH) -> Path
         str: the output path - the user will know this anyway, but it's done for ease
          of use
     """
-
     LOGGER.debug(
-        "Formatting image `%s`, outputting to `%s`", image_path, frame_output_path
+        "Formatting image `%s`, outputting to `%s`",
+        image_path,
+        frame_output_path,
     )
 
     pil_im = Image.open(image_path)
@@ -187,7 +190,9 @@ def get_progress(file_name: str, default: int = 0) -> int:
 
 @process_exception(logger=LOGGER)
 def set_progress(
-    video_path: str, current_frame: int, frame_count: int | None = None
+    video_path: str,
+    current_frame: int,
+    frame_count: int | None = None,
 ) -> None:
     """Update the JSON log file, so we can resume if the program is exited.
 
@@ -212,7 +217,8 @@ def set_progress(
 
 @process_exception(logger=LOGGER)
 def display_image(
-    image_path: Path = FRAME_PATH, display_time: int | float = FRAME_DELAY
+    image_path: Path = FRAME_PATH,
+    display_time: float = FRAME_DELAY,
 ) -> None:
     """Display an image on the EPD.
 
@@ -221,7 +227,6 @@ def display_image(
         display_time (Union([int, float])): the number of seconds to display the
          image for
     """
-
     output_path = format_image(image_path)
 
     LOGGER.info("Displaying `%s` for %s seconds", image_path, display_time)
@@ -246,7 +251,6 @@ def play_video(video_path: Path) -> None:
         FileNotFoundError: if the video path doesn't exist
         RuntimeError: if the video file is un-usable for some reason
     """
-
     LOGGER.info("Input video is `%s`", video_path.as_posix())
 
     if video_path.is_file():
@@ -259,7 +263,7 @@ def play_video(video_path: Path) -> None:
         raise RuntimeError("No streams found in ffmpeg probe")
 
     frame_count = int(
-        probe_streams[0].get("nb_frames") or 24 * float(probe_streams[0]["duration"])
+        probe_streams[0].get("nb_frames") or 24 * float(probe_streams[0]["duration"]),
     )
 
     LOGGER.info("There are %d frames in this video", frame_count)
@@ -269,12 +273,11 @@ def play_video(video_path: Path) -> None:
         set_progress(video_path, 0, frame_count)
 
     current_frame = get_progress(
-        video_path, 2000 if frame_count >= 10000 else 0  # noqa: PLR2004
+        video_path,
+        2000 if frame_count >= 10000 else 0,  # noqa: PLR2004
     )
 
-    hrs, secs = divmod(
-        (((frame_count - current_frame) / INCREMENT) * FRAME_DELAY), 3600
-    )
+    hrs, secs = divmod((((frame_count - current_frame) / INCREMENT) * FRAME_DELAY), 3600)
     mins, secs = divmod(secs, 60)
 
     LOGGER.info(
@@ -304,7 +307,6 @@ def choose_next_video() -> Path | None:
     Returns:
         str: the name of the video file to start playing
     """
-
     log_data: dict[str, ProgressInfo] = loads(PROGRESS_LOG.read_text())
 
     LOGGER.info("There are %i videos in the log", len(log_data))
@@ -350,7 +352,6 @@ def main() -> None:
 
     Loop through the movie directory and then the VSMP Google Photos album.
     """
-
     if PROGRESS_LOG.is_file():
         LOGGER.warning("Progress log not found at `%s`", PROGRESS_LOG)
         PROGRESS_LOG.write_text("{}")
