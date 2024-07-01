@@ -32,7 +32,7 @@ repos:
         language_version: python3.11
 
   - repo: https://github.com/asottile/blacken-docs
-    rev: 1.16.0
+    rev: 1.18.0
     hooks:
       - id: blacken-docs
 
@@ -99,7 +99,7 @@ repos:
           - --all
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.10.0
+    rev: v1.10.1
     hooks:
       - id: mypy
         args:
@@ -145,6 +145,6 @@ repos:
           - '*.svg,*.json'
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.4.10
+    rev: v0.5.0
     hooks:
       - id: ruff
