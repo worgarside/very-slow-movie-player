@@ -1,40 +1,23 @@
 ---
+default_language_version:
+  python: python3.12
+
 repos:
   - repo: https://github.com/worgarside/pre-commit-hooks-dependency-sync
     rev: 1.1.1
     hooks:
       - id: sync-additional-dependencies
 
-  - repo: https://github.com/python-poetry/poetry
-    rev: 1.8.0
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.5.0
     hooks:
-      - id: poetry-check
-        always_run: true
-      - id: poetry-export
-        always_run: true
-        args:
-          - -f
-          - requirements.txt
-          - -o
-          - requirements.txt
+      - id: ruff-format
+      - id: ruff
 
-  - repo: https://github.com/asottile/pyupgrade
-    rev: v3.16.0
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.7.1
     hooks:
-      - id: pyupgrade
-        args:
-          - --py311-plus
-
-  - repo: https://github.com/psf/black
-    rev: 24.4.2
-    hooks:
-      - id: black
-        language_version: python3.11
-
-  - repo: https://github.com/asottile/blacken-docs
-    rev: 1.18.0
-    hooks:
-      - id: blacken-docs
+      - id: actionlint
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.6.0
@@ -43,13 +26,8 @@ repos:
         args:
           - --maxkb=1000
       - id: check-case-conflict
-      - id: check-merge-conflict
-      - id: debug-statements
       - id: end-of-file-fixer
       - id: mixed-line-ending
-      - id: name-tests-test
-        args:
-          - --pytest-test-first
       - id: pretty-format-json
         args:
           - --no-sort-keys
@@ -57,16 +35,6 @@ repos:
           - --indent
           - '2'
       - id: trailing-whitespace
-
-  - repo: https://github.com/pycqa/isort
-    rev: 5.13.2
-    hooks:
-      - id: isort
-        name: isort (python)
-        args:
-          - -a
-          - from __future__ import annotations
-
 
   - repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
     rev: 0.2.3
@@ -91,13 +59,6 @@ repos:
           - parsable
           - --strict
 
-  - repo: https://github.com/hadialqattan/pycln
-    rev: v2.4.0
-    hooks:
-      - id: pycln
-        args:
-          - --all
-
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.10.1
     hooks:
@@ -106,26 +67,9 @@ repos:
           - --strict
           - --show-error-codes
         additional_dependencies:
-          - pydantic==2.7.4
+          - pydantic==2.8.0
           - types-requests
           - wg-utilities==5.15.3
-
-  - repo: local
-    hooks:
-      - id: pylint
-        name: pylint
-        entry: pylint
-        args:
-          - --disable=fixme
-          - --enable=useless-suppression
-          - --rcfile=.pylintrc
-          - --load-plugins=pylint_strict_informational
-        language: python
-        types:
-          - python
-        additional_dependencies:
-          - pylint==3.2.4
-          - pylint-strict-informational
 
   - repo: https://github.com/pre-commit/pygrep-hooks
     rev: v1.10.0
@@ -139,12 +83,4 @@ repos:
     hooks:
       - id: codespell
         additional_dependencies:
-          - tomli
-        args:
-          - --skip
-          - '*.svg,*.json'
-
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.5.0
-    hooks:
-      - id: ruff
+          - tomli==2.0.1

@@ -100,8 +100,7 @@ def get_playlist_content(playlist_id: str) -> list[YouTubeVideoInfo]:
     res.raise_for_status()
 
     playlist_items = [
-        YouTubeVideoInfo.model_validate(v["snippet"])
-        for v in res.json().get("items", [])
+        YouTubeVideoInfo.model_validate(v["snippet"]) for v in res.json().get("items", [])
     ]
 
     while token := res.json().get("nextPageToken"):
@@ -121,7 +120,7 @@ def get_playlist_content(playlist_id: str) -> list[YouTubeVideoInfo]:
             [
                 YouTubeVideoInfo.parse_obj(v["snippet"])
                 for v in res.json().get("items", [])
-            ]
+            ],
         )
 
     return playlist_items
@@ -130,7 +129,6 @@ def get_playlist_content(playlist_id: str) -> list[YouTubeVideoInfo]:
 @process_exception()
 def main() -> None:
     """Iterate through the playlist and download each video."""
-
     if PLAYLIST_ID is None:
         raise ValueError("Env var `YT_PLAYLIST_ID` not set")
 
@@ -139,9 +137,7 @@ def main() -> None:
             continue
 
         with YoutubeDL(YDL_OPTS) as ydl:
-            ydl.download(
-                [f"https://www.youtube.com/watch?v={video.resourceId.videoId}"]
-            )
+            ydl.download([f"https://www.youtube.com/watch?v={video.resourceId.videoId}"])
 
 
 if __name__ == "__main__":
