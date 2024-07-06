@@ -2,32 +2,17 @@
 
 from __future__ import annotations
 
-from os import environ, getenv
-from pathlib import Path
-from typing import ClassVar, Final, Literal
+from typing import ClassVar, Literal
 
 from httpx import get
 from pydantic import BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
+from utils import const
 from wg_utilities.decorators import process_exception
-from wg_utilities.functions import force_mkdir
 from wg_utilities.loggers import get_streaming_logger
 from youtube_dl import YoutubeDL  # type: ignore[import-untyped]
 
 LOGGER = get_streaming_logger(__name__)
-
-BASE_URL: Final = "https://www.googleapis.com/youtube/v3/"
-API_KEY: Final = getenv("YT_API_KEY")
-PLAYLIST_ID: Final = environ["YT_PLAYLIST_ID"]
-
-OUTPUT_DIR: Final = force_mkdir(
-    Path.home().joinpath(getenv("YT_OUTPUT_DIR", "movies").strip("/")).resolve(),
-)
-YDL_OPTS: Final = {
-    "format": "bestvideo[height<=480]/best[height<=480]",
-    "outtmpl": f"{OUTPUT_DIR}/%(title)s.%(ext)s",
-    "postprocessors": [{"key": "FFmpegVideoConvertor", "preferedformat": "mp4"}],
-}
 
 
 class YouTubeVideoThumbnailInfo(BaseModel):
@@ -97,7 +82,7 @@ def get_playlist_content(playlist_id: str) -> list[YouTubeVideoInfo]:
     res = get(
         "https://youtube.googleapis.com/youtube/v3/playlistItems",
         params={
-            "key": API_KEY,
+            "key": const.YT_API_KEY,
             "playlistId": playlist_id,
             "maxResults": 50,
             "part": "snippet",
@@ -116,9 +101,9 @@ def get_playlist_content(playlist_id: str) -> list[YouTubeVideoInfo]:
 
     while token := res.json().get("nextPageToken"):
         res = get(
-            f"{BASE_URL}playlistItems",
+            "https://www.googleapis.com/youtube/v3/playlistItems",
             params={
-                "key": API_KEY,
+                "key": const.YT_API_KEY,
                 "playlistId": playlist_id,
                 "maxResults": 50,
                 "part": "snippet",
@@ -140,11 +125,11 @@ def get_playlist_content(playlist_id: str) -> list[YouTubeVideoInfo]:
 @process_exception()
 def main() -> None:
     """Iterate through the playlist and download each video."""
-    with YoutubeDL(YDL_OPTS) as ydl:
+    with YoutubeDL(const.YDL_OPTS) as ydl:
         ydl.download([
             f"https://www.youtube.com/watch?v={video.resource_id.video_id}"
-            for video in get_playlist_content(PLAYLIST_ID)
-            if not (OUTPUT_DIR / (video.sanitized_title + ".mp4")).is_file()
+            for video in get_playlist_content(const.YT_PLAYLIST_ID)
+            if not (const.MEDIA_DIR / (video.sanitized_title + ".mp4")).is_file()
         ])
 
 

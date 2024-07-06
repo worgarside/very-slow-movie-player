@@ -2,6 +2,6 @@
 
 from __future__ import annotations
 
-from .epd7in5_v2 import EPD
+from .epd7in5_v2 import EPaperDisplay
 
-__all__ = ["EPD"]
+__all__ = ["EPaperDisplay"]
