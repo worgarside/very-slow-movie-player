@@ -2,51 +2,26 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
 from json import dumps, loads
-from logging import DEBUG, WARNING, getLogger
+from logging import DEBUG, getLogger
 from os import getenv
 from pathlib import Path
-from random import shuffle
 from tempfile import gettempdir
 from time import sleep
 from typing import TypedDict
 
 from PIL import Image
 from PIL.Image import Dither, Resampling
+from utils import EPD, const
 from wg_utilities.clients import GooglePhotosClient
 from wg_utilities.clients.google_photos import MediaType
 from wg_utilities.decorators import process_exception
-from wg_utilities.devices.epd import (
-    EPD,
-    EPD_HEIGHT,
-    EPD_WIDTH,
-    FRAME_DELAY,
-    implementation,
-)
-from wg_utilities.loggers import (
-    add_file_handler,
-    add_stream_handler,
-    add_warehouse_handler,
-)
 
-# pylint: disable=no-name-in-module
-# pylint: disable=no-name-in-module
 from ffmpeg import input as ffmpeg_input  # type: ignore[attr-defined]
 from ffmpeg import probe  # type: ignore[attr-defined]
 
 LOGGER = getLogger(__name__)
 LOGGER.setLevel(DEBUG)
-
-add_file_handler(
-    LOGGER,
-    logfile_path=Path.home()
-    / "logs"
-    / "very-slow-movie-player"
-    / datetime.now(UTC).strftime("%Y-%m-%d.log"),
-)
-add_stream_handler(LOGGER)
-add_warehouse_handler(LOGGER, level=WARNING)
 
 MEDIA_DIR = Path.home() / "vsmp_media"
 TMP_DIR = Path(gettempdir())
@@ -102,8 +77,8 @@ def extract_frame(
            defaults to centre
 
     * These have been replaced by the `format_image` function. Original lines were:
-        .filter("scale", EPD_WIDTH, EPD_HEIGHT, force_original_aspect_ratio=1)
-        .filter("pad", EPD_WIDTH, EPD_HEIGHT, -1, -1)
+        .filter("scale", DISPLAY.WIDTH, DISPLAY.HEIGHT, force_original_aspect_ratio=1)
+        .filter("pad", DISPLAY.WIDTH, DISPLAY.HEIGHT, -1, -1)
 
     Args:
         video_path (Path): the name of the file to extract the frame from
@@ -145,15 +120,15 @@ def format_image(image_path: Path, frame_output_path: Path = FRAME_PATH) -> Path
 
     pil_im = Image.open(image_path)
 
-    scale_factor = min(EPD_WIDTH / pil_im.size[0], EPD_HEIGHT / pil_im.size[1])
+    scale_factor = min(DISPLAY.WIDTH / pil_im.size[0], DISPLAY.HEIGHT / pil_im.size[1])
 
     resize_width = round(pil_im.size[0] * scale_factor)
     resize_height = round(pil_im.size[1] * scale_factor)
 
-    letterboxed = Image.new("RGB", (EPD_WIDTH, EPD_HEIGHT))
+    letterboxed = Image.new("RGB", (DISPLAY.WIDTH, DISPLAY.HEIGHT))
     offset = (
-        round((EPD_WIDTH - resize_width) / 2),
-        round((EPD_HEIGHT - resize_height) / 2),
+        round((DISPLAY.WIDTH - resize_width) / 2),
+        round((DISPLAY.HEIGHT - resize_height) / 2),
     )
 
     letterboxed.paste(
@@ -219,7 +194,7 @@ def set_progress(
 @process_exception(logger=LOGGER)
 def display_image(
     image_path: Path = FRAME_PATH,
-    display_time: float = FRAME_DELAY,
+    display_time: float = const.FRAME_DELAY,
 ) -> None:
     """Display an image on the EPD.
 
@@ -236,7 +211,7 @@ def display_image(
     pil_im = Image.open(output_path).convert(mode="1", dither=Dither.FLOYDSTEINBERG)
 
     # display the image
-    DISPLAY.display(DISPLAY.getbuffer(pil_im))  # type: ignore[arg-type]
+    DISPLAY.display(DISPLAY.getbuffer(pil_im))
 
     sleep(display_time)
 
@@ -254,7 +229,7 @@ def play_video(video_path: Path) -> None:
     """
     LOGGER.info("Input video is `%s`", video_path.as_posix())
 
-    if video_path.is_file():
+    if not video_path.is_file():
         raise FileNotFoundError(video_path)
 
     # Check how many frames are in the movie
@@ -278,7 +253,10 @@ def play_video(video_path: Path) -> None:
         2000 if frame_count >= 10000 else 0,  # noqa: PLR2004
     )
 
-    hrs, secs = divmod((((frame_count - current_frame) / INCREMENT) * FRAME_DELAY), 3600)
+    hrs, secs = divmod(
+        (((frame_count - current_frame) / INCREMENT) * const.FRAME_DELAY),
+        3600,
+    )
     mins, secs = divmod(secs, 60)
 
     LOGGER.info(
@@ -351,7 +329,7 @@ def main() -> None:
 
     Loop through the movie directory and then the VSMP Google Photos album.
     """
-    if PROGRESS_LOG.is_file():
+    if not PROGRESS_LOG.is_file():
         LOGGER.warning("Progress log not found at `%s`", PROGRESS_LOG)
         PROGRESS_LOG.write_text("{}")
 
@@ -368,10 +346,14 @@ def main() -> None:
                  "Unable to play video: `%s - %s`", type(exc).__name__, exc.__str__()
              )
     """
-    media_items = GOOGLE.get_album_by_name("Very Slow Movie Player").media_items
-    shuffle(media_items)
+    media_items = set(GOOGLE.get_album_by_name("Very Slow Movie Player").media_items)
+
     for item in media_items:
-        item.download(MEDIA_DIR, width_override=EPD_WIDTH, height_override=EPD_HEIGHT)
+        item.download(
+            MEDIA_DIR,
+            width_override=DISPLAY.WIDTH,
+            height_override=DISPLAY.HEIGHT,
+        )
 
         if item.media_type == MediaType.VIDEO:
             play_video(item.local_path)
@@ -379,7 +361,7 @@ def main() -> None:
             display_image(item.local_path, 300)
 
     DISPLAY.sleep()
-    implementation.module_exit()  # type: ignore[union-attr]
+    DISPLAY.pi.module_exit()
 
 
 if __name__ == "__main__":

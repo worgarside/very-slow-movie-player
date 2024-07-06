@@ -29,11 +29,9 @@ skip = '*.json,*.csv,*.xml,*.lock'
 
 [tool.mypy]
 plugins = ["pydantic.mypy"]
-always_false = "TEST_MODE"
-
 exclude = ["_local_sandbox"]
-mypy_path = "src"
 follow_imports = "normal"
+mypy_path = "very_slow_movie_player"
 
 check_untyped_defs = true
 
@@ -151,6 +149,6 @@ docstring-code-line-length = "dynamic"
 
 [tool.vulture]
 min_confidence = 70
-paths = ["src"]
+paths = ["very_slow_movie_player"]
 exclude = []
 sort_by_size = true

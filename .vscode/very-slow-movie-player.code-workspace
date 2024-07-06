@@ -11,7 +11,8 @@
 	"settings": {
 		"cSpell.words": [
 			"FLOYDSTEINBERG",
-			"letterboxed"
+			"letterboxed",
+			"spidev"
 		],
 	},
 	"launch": {

@@ -34,7 +34,7 @@ restart:
 	sudo systemctl restart vsmp.service
 
 run:
-	.venv/bin/python src/main.py
+	.venv/bin/python very_slow_movie_player/main.py
 
 start:
 	sudo systemctl start vsmp.service
