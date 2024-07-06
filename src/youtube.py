@@ -2,24 +2,28 @@
 
 from __future__ import annotations
 
-from os import getenv
+from os import environ, getenv
 from pathlib import Path
-from typing import Literal
+from typing import ClassVar, Final, Literal
 
-from dotenv import load_dotenv
-from pydantic import BaseModel
-from requests import get
+from httpx import get
+from pydantic import BaseModel, ConfigDict
+from pydantic.alias_generators import to_camel
 from wg_utilities.decorators import process_exception
+from wg_utilities.functions import force_mkdir
+from wg_utilities.loggers import get_streaming_logger
 from youtube_dl import YoutubeDL  # type: ignore[import-untyped]
 
-load_dotenv()
+LOGGER = get_streaming_logger(__name__)
 
-BASE_URL = "https://www.googleapis.com/youtube/v3/"
-API_KEY = getenv("YT_API_KEY")
-PLAYLIST_ID = getenv("YT_PLAYLIST_ID")
+BASE_URL: Final = "https://www.googleapis.com/youtube/v3/"
+API_KEY: Final = getenv("YT_API_KEY")
+PLAYLIST_ID: Final = environ["YT_PLAYLIST_ID"]
 
-OUTPUT_DIR = Path.home() / "movies"
-YDL_OPTS = {
+OUTPUT_DIR: Final = force_mkdir(
+    Path.home().joinpath(getenv("YT_OUTPUT_DIR", "movies").strip("/")).resolve(),
+)
+YDL_OPTS: Final = {
     "format": "bestvideo[height<=480]/best[height<=480]",
     "outtmpl": f"{OUTPUT_DIR}/%(title)s.%(ext)s",
     "postprocessors": [{"key": "FFmpegVideoConvertor", "preferedformat": "mp4"}],
@@ -38,23 +42,27 @@ class YouTubeVideoResourceIdInfo(BaseModel):
     """Model specifically for the resourceId object."""
 
     kind: Literal["youtube#video"]
-    videoId: str  # noqa: N815
+    video_id: str
+
+    model_config: ClassVar[ConfigDict] = ConfigDict(alias_generator=to_camel)
 
 
 class YouTubeVideoInfo(BaseModel):
     """Pydantic model for the YouTube API response."""
 
-    publishedAt: str  # noqa: N815
-    channelId: str  # noqa: N815
+    published_at: str
+    channel_id: str
     title: str
     description: str
     thumbnails: dict[str, YouTubeVideoThumbnailInfo]
-    channelTitle: str  # noqa: N815
-    playlistId: str  # noqa: N815
+    channel_title: str
+    playlist_id: str
     position: int
-    resourceId: YouTubeVideoResourceIdInfo  # noqa: N815
-    videoOwnerChannelTitle: str  # noqa: N815
-    videoOwnerChannelId: str  # noqa: N815
+    resource_id: YouTubeVideoResourceIdInfo
+    video_owner_channel_title: str
+    video_owner_channel_id: str
+
+    model_config: ClassVar[ConfigDict] = ConfigDict(alias_generator=to_camel)
 
     @property
     def sanitized_title(self) -> str:
@@ -97,6 +105,9 @@ def get_playlist_content(playlist_id: str) -> list[YouTubeVideoInfo]:
         timeout=10,
     )
 
+    if res.is_error:
+        LOGGER.error(res.text)
+
     res.raise_for_status()
 
     playlist_items = [
@@ -118,7 +129,7 @@ def get_playlist_content(playlist_id: str) -> list[YouTubeVideoInfo]:
 
         playlist_items.extend(
             [
-                YouTubeVideoInfo.parse_obj(v["snippet"])
+                YouTubeVideoInfo.model_validate(v["snippet"])
                 for v in res.json().get("items", [])
             ],
         )
@@ -129,15 +140,12 @@ def get_playlist_content(playlist_id: str) -> list[YouTubeVideoInfo]:
 @process_exception()
 def main() -> None:
     """Iterate through the playlist and download each video."""
-    if PLAYLIST_ID is None:
-        raise ValueError("Env var `YT_PLAYLIST_ID` not set")
-
-    for video in get_playlist_content(PLAYLIST_ID):
-        if (OUTPUT_DIR / (video.sanitized_title + ".mp4")).is_file():
-            continue
-
-        with YoutubeDL(YDL_OPTS) as ydl:
-            ydl.download([f"https://www.youtube.com/watch?v={video.resourceId.videoId}"])
+    with YoutubeDL(YDL_OPTS) as ydl:
+        ydl.download([
+            f"https://www.youtube.com/watch?v={video.resource_id.video_id}"
+            for video in get_playlist_content(PLAYLIST_ID)
+            if not (OUTPUT_DIR / (video.sanitized_title + ".mp4")).is_file()
+        ])
 
 
 if __name__ == "__main__":
