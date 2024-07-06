@@ -19,8 +19,7 @@ from wg_utilities.decorators import process_exception
 
 from ffmpeg import input as ffmpeg_input  # type: ignore[attr-defined]
 from ffmpeg import probe  # type: ignore[attr-defined]
-
-from .utils import EPD, const
+from very_slow_movie_player.utils import EPD, const
 
 LOGGER = getLogger(__name__)
 LOGGER.setLevel(DEBUG)
