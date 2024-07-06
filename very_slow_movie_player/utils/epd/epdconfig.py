@@ -32,11 +32,12 @@ THE SOFTWARE.
 
 from __future__ import annotations
 
-import sys
 from logging import debug
 from time import sleep
 from typing import Literal
 from unittest.mock import MagicMock
+
+from utils import const
 
 
 class RaspberryPi:
@@ -58,7 +59,7 @@ class RaspberryPi:
             # SPI device, bus = 0, device = 0
             self.spi = SpiDev(0, 0)
         except ImportError:
-            if sys.platform != "darwin":
+            if const.HOSTNAME == "mtrxpi":
                 raise
 
             self.gpio = MagicMock()
