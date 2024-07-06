@@ -32,8 +32,6 @@ GOOGLE = GooglePhotosClient(
 )
 
 
-INCREMENT = 12
-
 DISPLAY = EPaperDisplay()
 
 
@@ -244,7 +242,7 @@ def play_video(video_path: Path) -> None:
     )
 
     hrs, secs = divmod(
-        (((frame_count - current_frame) / INCREMENT) * const.FRAME_DELAY),
+        (((frame_count - current_frame) / const.INCREMENT) * const.FRAME_DELAY),
         3600,
     )
     mins, secs = divmod(secs, 60)
@@ -256,7 +254,7 @@ def play_video(video_path: Path) -> None:
         secs,
     )
 
-    for frame in range(current_frame, frame_count, INCREMENT):
+    for frame in range(current_frame, frame_count, const.INCREMENT):
         set_progress(video_path, frame, frame_count)
 
         # Use ffmpeg to extract a frame from the movie, crop it,
@@ -270,8 +268,7 @@ def play_video(video_path: Path) -> None:
 def choose_next_video() -> Path | None:
     """Pick which video to play next.
 
-    Either find one that hasn't yet been finished, or one that hasn't even been
-    started.
+    Either find one that hasn't yet been finished, or one that hasn't even been started.
 
     Returns:
         str: the name of the video file to start playing
@@ -287,7 +284,7 @@ def choose_next_video() -> Path | None:
 
         if (total := video.get("total", -1)) - (
             current_frame := video.get("current", -1)
-        ) > INCREMENT:
+        ) > const.INCREMENT:
             LOGGER.info(
                 "`%s` has only had %i/%i frames played",
                 log_file_path,
@@ -296,19 +293,17 @@ def choose_next_video() -> Path | None:
             )
             return Path(log_file_path)
 
-    for file_name in const.MOVIE_DIR.iterdir():
-        file_path = const.MOVIE_DIR / file_name
-
-        if not file_name.name.lower().endswith(".mp4"):
-            LOGGER.debug("`%s` is not an mp4", file_name.name)
+    for file in const.MEDIA_DIR.iterdir():
+        if file.suffix != ".mp4":
+            LOGGER.debug("`%s` is not an mp4", file)
             continue
 
-        if file_path.as_posix() in log_data:
-            LOGGER.debug("`%s` has already been played", file_path)
+        if file.resolve().as_posix() in log_data:
+            LOGGER.debug("`%s` has already been played", file)
             continue
 
-        LOGGER.info("`%s` hasn't been played yet, returning", file_path)
-        return file_path
+        LOGGER.info("`%s` hasn't been played yet, returning", file)
+        return file
 
     return None
 
