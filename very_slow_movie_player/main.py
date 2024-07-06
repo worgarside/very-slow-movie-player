@@ -6,7 +6,6 @@ from json import dumps, loads
 from logging import DEBUG, getLogger
 from os import getenv
 from pathlib import Path
-from random import shuffle
 from tempfile import gettempdir
 from time import sleep
 from typing import TypedDict
@@ -347,8 +346,8 @@ def main() -> None:
                  "Unable to play video: `%s - %s`", type(exc).__name__, exc.__str__()
              )
     """
-    media_items = GOOGLE.get_album_by_name("Very Slow Movie Player").media_items
-    shuffle(media_items)
+    media_items = set(GOOGLE.get_album_by_name("Very Slow Movie Player").media_items)
+
     for item in media_items:
         item.download(
             MEDIA_DIR,
