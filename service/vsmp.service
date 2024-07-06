@@ -1,13 +1,17 @@
 [Unit]
 Description=Very Slow Movie Player!
+After=multi-user.target
+StartLimitBurst=10
+StartLimitIntervalSec=10
 
 [Service]
 Type=simple
 Restart=always
-RestartSec=1
+RestartSec=5
 User=pi
 EnvironmentFile=/home/pi/very-slow-movie-player/.env
 ExecStart=/home/pi/very-slow-movie-player/.venv/bin/python /home/pi/very-slow-movie-player/very_slow_movie_player/main.py
+WorkingDirectory=/home/pi/very-slow-movie-player
 
 [Install]
 WantedBy=multi-user.target
