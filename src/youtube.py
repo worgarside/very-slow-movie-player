@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 from pydantic import BaseModel
 from requests import get
 from wg_utilities.decorators import process_exception
-from youtube_dl import YoutubeDL
+from youtube_dl import YoutubeDL  # type: ignore[import-untyped]
 
 load_dotenv()
 
