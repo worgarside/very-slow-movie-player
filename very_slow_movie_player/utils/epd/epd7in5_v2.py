@@ -31,20 +31,19 @@ THE SOFTWARE.
 from __future__ import annotations
 
 from logging import debug
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Final
 
 from .epdconfig import RaspberryPi
 
 if TYPE_CHECKING:
     from PIL.Image import Image
 
-# Display resolution
-EPD_WIDTH = 800
-EPD_HEIGHT = 480
-
 
 class EPD:
     """Electronic paper driver class."""
+
+    WIDTH: Final = 800
+    HEIGHT: Final = 480
 
     def __init__(self) -> None:
         self.pi = RaspberryPi()
@@ -53,8 +52,6 @@ class EPD:
         self.dc_pin = self.pi.DC_PIN
         self.busy_pin = self.pi.BUSY_PIN
         self.cs_pin = self.pi.CS_PIN
-        self.width = EPD_WIDTH
-        self.height = EPD_HEIGHT
 
     # Hardware reset
     def reset(self) -> None:
@@ -132,31 +129,31 @@ class EPD:
 
     def getbuffer(self, image: Image) -> list[int]:
         """Get the image buffer."""
-        buf = [0xFF] * (int(self.width / 8) * self.height)
+        buf = [0xFF] * (int(self.WIDTH / 8) * self.HEIGHT)
         image_monocolor = image.convert("1")
         imwidth, imheight = image_monocolor.size
         pixels = image_monocolor.load()
-        if imwidth == self.width and imheight == self.height:
+        if imwidth == self.WIDTH and imheight == self.HEIGHT:
             debug("Vertical")
             for y in range(imheight):
                 for x in range(imwidth):
                     # Set the bits for the column of pixels at the current position.
                     if pixels[x, y] == 0:  # type: ignore[index]
-                        buf[int((x + y * self.width) / 8)] &= ~(0x80 >> (x % 8))
-        elif imwidth == self.height and imheight == self.width:
+                        buf[int((x + y * self.WIDTH) / 8)] &= ~(0x80 >> (x % 8))
+        elif imwidth == self.HEIGHT and imheight == self.WIDTH:
             debug("Horizontal")
             for y in range(imheight):
                 for x in range(imwidth):
                     new_x = y
-                    new_y = self.height - x - 1
+                    new_y = self.HEIGHT - x - 1
                     if pixels[x, y] == 0:  # type: ignore[index]
-                        buf[int((new_x + new_y * self.width) / 8)] &= ~(0x80 >> (y % 8))
+                        buf[int((new_x + new_y * self.WIDTH) / 8)] &= ~(0x80 >> (y % 8))
         return buf
 
     def display(self, image: Image) -> None:
         """Display the image."""
         self.send_command(0x13)
-        for i in range(int(self.width * self.height / 8)):
+        for i in range(int(self.WIDTH * self.HEIGHT / 8)):
             self.send_data(~image[i])  # type: ignore[index]
 
         self.send_command(0x12)
@@ -166,11 +163,11 @@ class EPD:
     def clear(self) -> None:
         """Clear the display."""
         self.send_command(0x10)
-        for _ in range(int(self.width * self.height / 8)):
+        for _ in range(int(self.WIDTH * self.HEIGHT / 8)):
             self.send_data(0x00)
 
         self.send_command(0x13)
-        for _ in range(int(self.width * self.height / 8)):
+        for _ in range(int(self.WIDTH * self.HEIGHT / 8)):
             self.send_data(0x00)
 
         self.send_command(0x12)

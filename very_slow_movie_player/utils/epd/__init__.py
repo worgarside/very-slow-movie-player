@@ -2,6 +2,6 @@
 
 from __future__ import annotations
 
-from .epd7in5_v2 import EPD, EPD_HEIGHT, EPD_WIDTH
+from .epd7in5_v2 import EPD
 
-__all__ = ["EPD", "EPD_HEIGHT", "EPD_WIDTH"]
+__all__ = ["EPD"]
