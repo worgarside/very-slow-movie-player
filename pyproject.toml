@@ -151,6 +151,6 @@ docstring-code-line-length = "dynamic"
 
 [tool.vulture]
 min_confidence = 70
-paths = ["src"]
+paths = ["very_slow_movie_player"]
 exclude = []
 sort_by_size = true

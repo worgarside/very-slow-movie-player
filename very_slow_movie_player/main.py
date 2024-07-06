@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
 from json import dumps, loads
-from logging import DEBUG, WARNING, getLogger
+from logging import DEBUG, getLogger
 from os import getenv
 from pathlib import Path
 from random import shuffle
@@ -24,11 +23,6 @@ from wg_utilities.devices.epd import (
     FRAME_DELAY,
     implementation,
 )
-from wg_utilities.loggers import (
-    add_file_handler,
-    add_stream_handler,
-    add_warehouse_handler,
-)
 
 # pylint: disable=no-name-in-module
 # pylint: disable=no-name-in-module
@@ -37,16 +31,6 @@ from ffmpeg import probe  # type: ignore[attr-defined]
 
 LOGGER = getLogger(__name__)
 LOGGER.setLevel(DEBUG)
-
-add_file_handler(
-    LOGGER,
-    logfile_path=Path.home()
-    / "logs"
-    / "very-slow-movie-player"
-    / datetime.now(UTC).strftime("%Y-%m-%d.log"),
-)
-add_stream_handler(LOGGER)
-add_warehouse_handler(LOGGER, level=WARNING)
 
 MEDIA_DIR = Path.home() / "vsmp_media"
 TMP_DIR = Path(gettempdir())
@@ -351,7 +335,7 @@ def main() -> None:
 
     Loop through the movie directory and then the VSMP Google Photos album.
     """
-    if PROGRESS_LOG.is_file():
+    if not PROGRESS_LOG.is_file():
         LOGGER.warning("Progress log not found at `%s`", PROGRESS_LOG)
         PROGRESS_LOG.write_text("{}")
 
