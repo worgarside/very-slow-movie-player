@@ -230,7 +230,7 @@ def play_video(video_path: Path) -> None:
     """
     LOGGER.info("Input video is `%s`", video_path.as_posix())
 
-    if video_path.is_file():
+    if not video_path.is_file():
         raise FileNotFoundError(video_path)
 
     # Check how many frames are in the movie
