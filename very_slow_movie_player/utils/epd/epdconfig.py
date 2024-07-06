@@ -32,9 +32,11 @@ THE SOFTWARE.
 
 from __future__ import annotations
 
+import sys
 from logging import debug
 from time import sleep
 from typing import Literal
+from unittest.mock import MagicMock
 
 
 class RaspberryPi:
@@ -47,13 +49,20 @@ class RaspberryPi:
     BUSY_PIN = 24
 
     def __init__(self) -> None:
-        from RPi import GPIO  # noqa: PLC0415
-        from spidev import SpiDev  # type: ignore[import-not-found] # noqa: PLC0415
+        try:
+            from RPi import GPIO  # noqa: PLC0415
+            from spidev import SpiDev  # type: ignore[import-not-found] # noqa: PLC0415
 
-        self.gpio = GPIO
+            self.gpio = GPIO
 
-        # SPI device, bus = 0, device = 0
-        self.spi = SpiDev(0, 0)
+            # SPI device, bus = 0, device = 0
+            self.spi = SpiDev(0, 0)
+        except ImportError:
+            if sys.platform != "darwin":
+                raise
+
+            self.gpio = MagicMock()
+            self.spi = MagicMock()
 
     def digital_write(self, pin: int, *, value: bool) -> None:
         """Write the value to the pin."""

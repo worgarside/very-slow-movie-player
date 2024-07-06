@@ -1,6 +1,6 @@
 from __future__ import annotations
 
 from . import const
-from .epd import EPD
+from .epd import EPaperDisplay
 
-__all__ = ["EPD", "const"]
+__all__ = ["EPaperDisplay", "const"]

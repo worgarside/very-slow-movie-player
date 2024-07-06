@@ -39,7 +39,7 @@ if TYPE_CHECKING:
     from PIL.Image import Image
 
 
-class EPD:
+class EPaperDisplay:
     """Electronic paper driver class."""
 
     WIDTH: Final = 800

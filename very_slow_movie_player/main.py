@@ -3,32 +3,24 @@
 from __future__ import annotations
 
 from json import dumps, loads
-from logging import DEBUG, getLogger
 from os import getenv
 from pathlib import Path
-from tempfile import gettempdir
 from time import sleep
 from typing import TypedDict
 
 from PIL import Image
 from PIL.Image import Dither, Resampling
-from utils import EPD, const
-from wg_utilities.clients import GooglePhotosClient
-from wg_utilities.clients.google_photos import MediaType
+from utils import EPaperDisplay, const
+from wg_utilities.clients.google_photos import GooglePhotosClient, MediaType
 from wg_utilities.decorators import process_exception
+from wg_utilities.loggers import get_streaming_logger
 
 from ffmpeg import input as ffmpeg_input  # type: ignore[attr-defined]
 from ffmpeg import probe  # type: ignore[attr-defined]
 
-LOGGER = getLogger(__name__)
-LOGGER.setLevel(DEBUG)
+LOGGER = get_streaming_logger(__name__)
 
-MEDIA_DIR = Path.home() / "vsmp_media"
-TMP_DIR = Path(gettempdir())
 
-LOGGER.debug("Temp directory is `%s`", TMP_DIR.as_posix())
-
-DISPLAY = EPD()
 GOOGLE = GooglePhotosClient(
     client_id=getenv("GOOGLE_CLIENT_ID"),
     client_secret=getenv("GOOGLE_CLIENT_SECRET"),
@@ -39,12 +31,10 @@ GOOGLE = GooglePhotosClient(
     ],
 )
 
-MOVIE_DIRECTORY = Path.home() / "movies"
-EXTRACT_PATH = TMP_DIR / "vsmp_extract.jpg"
-FRAME_PATH = TMP_DIR / "vsmp_frame.jpg"
-PROGRESS_LOG = Path(__file__).parent / "progress_log.json"
 
 INCREMENT = 12
+
+DISPLAY = EPaperDisplay()
 
 
 class ProgressInfo(TypedDict):
@@ -59,7 +49,7 @@ def extract_frame(
     video_path: Path,
     frame: int,
     *,
-    extract_output_path: Path = EXTRACT_PATH,
+    extract_output_path: Path = const.EXTRACT_PATH,
 ) -> Path:
     """Output a frame from the video file to a JPG image.
 
@@ -101,7 +91,7 @@ def extract_frame(
 
 
 @process_exception(logger=LOGGER)
-def format_image(image_path: Path, frame_output_path: Path = FRAME_PATH) -> Path:
+def format_image(image_path: Path, frame_output_path: Path = const.FRAME_PATH) -> Path:
     """Formats an image for displaying on the EPD.
 
     Args:
@@ -154,7 +144,7 @@ def get_progress(file_name: str, default: int = 0) -> int:
     Returns:
         int: the number of the frame that was played most recently
     """
-    log_data: dict[str, ProgressInfo] = loads(PROGRESS_LOG.read_text())
+    log_data: dict[str, ProgressInfo] = loads(const.PROGRESS_LOG.read_text())
 
     LOGGER.info("Getting progress for `%s`", file_name)
 
@@ -177,7 +167,7 @@ def set_progress(
         current_frame (int): which frame has been played most recently
         frame_count (int): the total number of frames in the video
     """
-    log_data = loads(PROGRESS_LOG.read_text())
+    log_data = loads(const.PROGRESS_LOG.read_text())
 
     progress = {video_path: {"current": current_frame}}
 
@@ -188,12 +178,12 @@ def set_progress(
 
     log_data.update(progress)
 
-    PROGRESS_LOG.write_text(dumps(log_data, indent=2, sort_keys=True))
+    const.PROGRESS_LOG.write_text(dumps(log_data, indent=2, sort_keys=True))
 
 
 @process_exception(logger=LOGGER)
 def display_image(
-    image_path: Path = FRAME_PATH,
+    image_path: Path = const.FRAME_PATH,
     display_time: float = const.FRAME_DELAY,
 ) -> None:
     """Display an image on the EPD.
@@ -286,7 +276,7 @@ def choose_next_video() -> Path | None:
     Returns:
         str: the name of the video file to start playing
     """
-    log_data: dict[str, ProgressInfo] = loads(PROGRESS_LOG.read_text())
+    log_data: dict[str, ProgressInfo] = loads(const.PROGRESS_LOG.read_text())
 
     LOGGER.info("There are %i videos in the log", len(log_data))
 
@@ -306,8 +296,8 @@ def choose_next_video() -> Path | None:
             )
             return Path(log_file_path)
 
-    for file_name in MOVIE_DIRECTORY.iterdir():
-        file_path = MOVIE_DIRECTORY / file_name
+    for file_name in const.MOVIE_DIR.iterdir():
+        file_path = const.MOVIE_DIR / file_name
 
         if not file_name.name.lower().endswith(".mp4"):
             LOGGER.debug("`%s` is not an mp4", file_name.name)
@@ -329,9 +319,9 @@ def main() -> None:
 
     Loop through the movie directory and then the VSMP Google Photos album.
     """
-    if not PROGRESS_LOG.is_file():
-        LOGGER.warning("Progress log not found at `%s`", PROGRESS_LOG)
-        PROGRESS_LOG.write_text("{}")
+    if not const.PROGRESS_LOG.is_file():
+        LOGGER.warning("Progress log not found at `%s`", const.PROGRESS_LOG)
+        const.PROGRESS_LOG.write_text("{}")
 
     # Initialise and clear the screen
     DISPLAY.init()
@@ -350,7 +340,7 @@ def main() -> None:
 
     for item in media_items:
         item.download(
-            MEDIA_DIR,
+            const.MEDIA_DIR,
             width_override=DISPLAY.WIDTH,
             height_override=DISPLAY.HEIGHT,
         )
