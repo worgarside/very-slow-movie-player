@@ -150,15 +150,16 @@ def format_image(image_path: Path, frame_output_path: Path = FRAME_PATH) -> Path
     resize_width = round(pil_im.size[0] * scale_factor)
     resize_height = round(pil_im.size[1] * scale_factor)
 
-    pil_im = pil_im.resize((resize_width, resize_height), Resampling.LANCZOS)
-
     letterboxed = Image.new("RGB", (EPD_WIDTH, EPD_HEIGHT))
     offset = (
         round((EPD_WIDTH - resize_width) / 2),
         round((EPD_HEIGHT - resize_height) / 2),
     )
 
-    letterboxed.paste(pil_im, offset)
+    letterboxed.paste(
+        pil_im.resize((resize_width, resize_height), Resampling.LANCZOS),
+        offset,
+    )
 
     letterboxed.save(frame_output_path)
 
@@ -235,7 +236,7 @@ def display_image(
     pil_im = Image.open(output_path).convert(mode="1", dither=Dither.FLOYDSTEINBERG)
 
     # display the image
-    DISPLAY.display(DISPLAY.getbuffer(pil_im))
+    DISPLAY.display(DISPLAY.getbuffer(pil_im))  # type: ignore[arg-type]
 
     sleep(display_time)
 
@@ -311,12 +312,10 @@ def choose_next_video() -> Path | None:
 
     LOGGER.info("There are %i videos in the log", len(log_data))
 
-    for log_file_path in log_data:
+    for log_file_path, video in log_data.items():
         if not Path(log_file_path).is_file():
             LOGGER.debug("`%s` no longer available", log_file_path)
             continue
-
-        video = log_data[log_file_path]
 
         if (total := video.get("total", -1)) - (
             current_frame := video.get("current", -1)

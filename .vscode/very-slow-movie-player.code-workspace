@@ -9,16 +9,17 @@
 		}
 	],
 	"settings": {
-		"files.associations": {
-			"*.yaml": "home-assistant"
-		}
+		"cSpell.words": [
+			"FLOYDSTEINBERG",
+			"letterboxed"
+		]
 	},
 	"launch": {
 		"version": "0.2.0",
 		"configurations": [
 			{
 				"name": "Python: Current File",
-				"type": "python",
+				"type": "debugpy",
 				"request": "launch",
 				"program": "${file}",
 				"console": "integratedTerminal",
