@@ -13,13 +13,13 @@ from typing import TypedDict
 
 from PIL import Image
 from PIL.Image import Dither, Resampling
+from utils import EPD, const
 from wg_utilities.clients import GooglePhotosClient
 from wg_utilities.clients.google_photos import MediaType
 from wg_utilities.decorators import process_exception
 
 from ffmpeg import input as ffmpeg_input  # type: ignore[attr-defined]
 from ffmpeg import probe  # type: ignore[attr-defined]
-from very_slow_movie_player.utils import EPD, const
 
 LOGGER = getLogger(__name__)
 LOGGER.setLevel(DEBUG)
@@ -212,7 +212,7 @@ def display_image(
     pil_im = Image.open(output_path).convert(mode="1", dither=Dither.FLOYDSTEINBERG)
 
     # display the image
-    DISPLAY.display(DISPLAY.getbuffer(pil_im))  # type: ignore[arg-type]
+    DISPLAY.display(DISPLAY.getbuffer(pil_im))
 
     sleep(display_time)
 

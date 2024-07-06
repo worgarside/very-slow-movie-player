@@ -31,6 +31,7 @@ skip = '*.json,*.csv,*.xml,*.lock'
 plugins = ["pydantic.mypy"]
 exclude = ["_local_sandbox"]
 follow_imports = "normal"
+mypy_path = "very_slow_movie_player"
 
 check_untyped_defs = true
 

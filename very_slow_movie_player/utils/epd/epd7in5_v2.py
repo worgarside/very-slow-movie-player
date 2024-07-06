@@ -150,11 +150,11 @@ class EPD:
                         buf[int((new_x + new_y * self.WIDTH) / 8)] &= ~(0x80 >> (y % 8))
         return buf
 
-    def display(self, image: Image) -> None:
+    def display(self, image: list[int]) -> None:
         """Display the image."""
         self.send_command(0x13)
         for i in range(int(self.WIDTH * self.HEIGHT / 8)):
-            self.send_data(~image[i])  # type: ignore[index]
+            self.send_data(~image[i])
 
         self.send_command(0x12)
         self.pi.delay_ms(100)
