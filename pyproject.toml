@@ -7,7 +7,7 @@ license = "MIT"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = ">=3.12,<3.13"
 "rpi.gpio" = { platform = "linux", version = "*" }
 pillow = "*"
 spidev = { platform = "linux", version = "*" }
