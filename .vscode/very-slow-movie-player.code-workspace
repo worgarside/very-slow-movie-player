@@ -14,6 +14,9 @@
 			"letterboxed",
 			"spidev"
 		],
+		"python.analysis.extraPaths": [
+			"./very_slow_movie_player"
+		],
 	},
 	"launch": {
 		"version": "0.2.0",

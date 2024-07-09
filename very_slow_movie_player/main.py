@@ -130,13 +130,13 @@ def format_image(image_path: Path, frame_output_path: Path = const.FRAME_PATH) -
 
 
 @process_exception(logger=LOGGER)
-def get_progress(file_name: str, default: int = 0) -> int:
+def get_progress(video_path: Path, default: int = 0) -> int:
     """Get the number of the most recently played frame from the JSON log file.
 
     This is so we can resume in the case of an early exit.
 
     Args:
-        file_name (str): the name of the file being played
+        video_path (Path): the path to the file being played
         default (int): a default value to return if the file isn't logged
 
     Returns:
@@ -144,24 +144,24 @@ def get_progress(file_name: str, default: int = 0) -> int:
     """
     log_data: dict[str, ProgressInfo] = loads(const.PROGRESS_LOG.read_text())
 
-    LOGGER.info("Getting progress for `%s`", file_name)
+    LOGGER.info("Getting progress for `%s`", video_path)
 
     try:
-        return log_data[file_name]["current"]
+        return log_data[video_path.as_posix()]["current"]
     except KeyError:
         return default
 
 
 @process_exception(logger=LOGGER)
 def set_progress(
-    video_path: str,
+    video_path: Path,
     current_frame: int,
     frame_count: int | None = None,
 ) -> None:
     """Update the JSON log file, so we can resume if the program is exited.
 
     Args:
-        video_path (str): the path to the file being played
+        video_path (Path): the path to the file being played
         current_frame (int): which frame has been played most recently
         frame_count (int): the total number of frames in the video
     """

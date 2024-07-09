@@ -86,8 +86,7 @@ repos:
           - --show-error-codes
         additional_dependencies:
           - pydantic==2.8.2
-          - types-requests
-          - wg-utilities==5.15.3
+          - wg-utilities==5.15.4
           - youtube-dl-nightly==2024.7.8
           - Pillow==10.4.0
           - httpx==0.27.0
@@ -112,3 +111,8 @@ repos:
     rev: v2.11
     hooks:
       - id: vulture
+
+  - repo: https://github.com/fredrikaverpil/creosote
+    rev: v3.0.2
+    hooks:
+      - id: creosote
