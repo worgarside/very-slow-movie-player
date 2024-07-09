@@ -12,9 +12,6 @@ python = ">=3.12,<3.13"
 pillow = "*"
 spidev = { platform = "linux", version = "*" }
 ffmpeg-python = "*"
-requests = "*"
-google-auth-oauthlib = "*"
-python-dateutil = { platform = "linux", version = "*" }
 wg-utilities = { extras = [
   "clients",
   "devices-epd",
@@ -158,6 +155,9 @@ paths = ["very_slow_movie_player"]
 deps-file = "pyproject.toml"
 sections=["tool.poetry.dependencies"]
 exclude-deps =[
+  "ffmpeg-python",
   "pillow",
+  "rpi.gpio",
+  "spidev",
   "youtube-dl-nightly",
 ]

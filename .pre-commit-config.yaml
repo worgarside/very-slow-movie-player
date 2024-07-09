@@ -86,8 +86,7 @@ repos:
           - --show-error-codes
         additional_dependencies:
           - pydantic==2.8.2
-          - types-requests
-          - wg-utilities==5.15.3
+          - wg-utilities==5.15.4
           - youtube-dl-nightly==2024.7.8
           - Pillow
           - httpx==0.27.0
