@@ -119,9 +119,9 @@ flask==3.0.3 ; python_version >= "3.12" and python_version < "3.13" \
 future==1.0.0 ; python_version >= "3.12" and python_version < "3.13" \
     --hash=sha256:929292d34f5872e70396626ef385ec22355a1fae8ad29e1a734c3e43f9fbc216 \
     --hash=sha256:bd2968309307861edae1458a4f8a4f3598c03be43b97521076aebf5d94c07b05
-google-auth-oauthlib==1.2.0 ; python_version >= "3.12" and python_version < "3.13" \
-    --hash=sha256:292d2d3783349f2b0734a0a0207b1e1e322ac193c2c09d8f7c613fb7cc501ea8 \
-    --hash=sha256:297c1ce4cb13a99b5834c74a1fe03252e1e499716718b190f56bcb9c4abc4faf
+google-auth-oauthlib==1.2.1 ; python_version >= "3.12" and python_version < "3.13" \
+    --hash=sha256:2d58a27262d55aa1b87678c3ba7142a080098cbc2024f903c62355deb235d91f \
+    --hash=sha256:afd0cad092a2eaa53cd8e8298557d6de1034c6cb4a740500b5357b648af97263
 google-auth==2.31.0 ; python_version >= "3.12" and python_version < "3.13" \
     --hash=sha256:042c4702efa9f7d3c48d3a69341c209381b125faa6dbf3ebe56bc7e40ae05c23 \
     --hash=sha256:87805c36970047247c8afe614d4e3af8eceafc1ebba0c679fe75ddd1d575e871
