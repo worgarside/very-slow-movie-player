@@ -152,3 +152,12 @@ min_confidence = 70
 paths = ["very_slow_movie_player"]
 exclude = []
 sort_by_size = true
+
+[tool.creosote]
+paths = ["very_slow_movie_player"]
+deps-file = "pyproject.toml"
+sections=["tool.poetry.dependencies"]
+exclude-deps =[
+  "pillow",
+  "youtube-dl-nightly",
+]
