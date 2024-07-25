@@ -789,15 +789,15 @@ testing = ["botocore"]
 
 [[package]]
 name = "youtube-dl-nightly"
-version = "2024.7.11"
+version = "2024.7.25"
 description = "YouTube video downloader"
 optional = false
 python-versions = "*"
 files = [
-    {file = "youtube_dl_nightly-2024.7.11-py2.py3-none-any.whl", hash = "sha256:780842b7023f326a4fa3100ff0ebb5d7525fe812f94a223ec417a986241e4a60"},
+    {file = "youtube_dl_nightly-2024.7.25-py2.py3-none-any.whl", hash = "sha256:cd328fe309c53e86631544d741bf36e5e9aeaa5a350cfe1bea54b18bf1845719"},
 ]
 
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.12,<3.13"
-content-hash = "259c3baa04114ec225f62d2e0792457a5a766fdc9d5d36064da241572c56f8d6"
+content-hash = "323b1334f2ce686c1a4f4adc29b23e2a45bddd19d2e1ce59d07fe7c774fb1921"
