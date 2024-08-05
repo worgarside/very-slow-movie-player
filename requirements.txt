@@ -406,5 +406,5 @@ werkzeug==3.0.3 ; python_version >= "3.12" and python_version < "3.13" \
 wg-utilities[clients,devices-epd,exceptions]==5.15.4 ; python_version >= "3.12" and python_version < "3.13" \
     --hash=sha256:74a0a3e273fa02696e5ad9984d805d4c16f603d19d592c6e75e93fc55a1a4290 \
     --hash=sha256:c1d415ef3acc9df94452a10513bdd599d45292b5399b7c9c8b607d86806517d5
-youtube-dl-nightly==2024.7.25 ; python_version >= "3.12" and python_version < "3.13" \
-    --hash=sha256:cd328fe309c53e86631544d741bf36e5e9aeaa5a350cfe1bea54b18bf1845719
+youtube-dl-nightly==2024.8.2 ; python_version >= "3.12" and python_version < "3.13" \
+    --hash=sha256:719ab7f5ee3dced00f2d73b36e779dfda2811ae0fe593636a6be90ec506eab2b
