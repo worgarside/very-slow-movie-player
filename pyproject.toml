@@ -102,6 +102,9 @@ lint.ignore = [
   "FIX002", # https://docs.astral.sh/ruff/rules/line-contains-todo/
   "ANN101", # https://docs.astral.sh/ruff/rules/missing-type-self/
   "CPY",    # https://docs.astral.sh/ruff/rules/#flake8-copyright-cpy
+  "DOC201", # https://docs.astral.sh/ruff/rules/docstring-missing-returns/
+  "DOC402", # https://docs.astral.sh/ruff/rules/docstring-missing-yields/
+  "DOC501", # https://docs.astral.sh/ruff/rules/docstring-missing-exception/
 ]
 
 [tool.ruff.lint.per-file-ignores]
@@ -153,8 +156,8 @@ sort_by_size = true
 [tool.creosote]
 paths = ["very_slow_movie_player"]
 deps-file = "pyproject.toml"
-sections=["tool.poetry.dependencies"]
-exclude-deps =[
+sections = ["tool.poetry.dependencies"]
+exclude-deps = [
   "ffmpeg-python",
   "pillow",
   "rpi.gpio",
