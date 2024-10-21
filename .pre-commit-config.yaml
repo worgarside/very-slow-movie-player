@@ -22,23 +22,23 @@ repos:
           - requirements.txt
 
   - repo: https://github.com/worgarside/pre-commit-hooks-dependency-sync
-    rev: 1.2.0
+    rev: 1.2.1
     hooks:
       - id: sync-additional-dependencies
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.6.7
+    rev: v0.7.0
     hooks:
       - id: ruff-format
       - id: ruff
 
   - repo: https://github.com/rhysd/actionlint
-    rev: v1.7.2
+    rev: v1.7.3
     hooks:
       - id: actionlint
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v5.0.0
     hooks:
       - id: check-added-large-files
         args:
@@ -78,7 +78,7 @@ repos:
           - --strict
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.11.2
+    rev: v1.12.1
     hooks:
       - id: mypy
         args:
@@ -108,11 +108,11 @@ repos:
           - tomli==2.0.1
 
   - repo: https://github.com/jendrikseipp/vulture
-    rev: v2.12
+    rev: v2.13
     hooks:
       - id: vulture
 
   - repo: https://github.com/fredrikaverpil/creosote
-    rev: v3.0.2
+    rev: v3.1.0
     hooks:
       - id: creosote
